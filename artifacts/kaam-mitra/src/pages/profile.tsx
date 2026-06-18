@@ -1,0 +1,101 @@
+import { useLocation } from "wouter";
+import { motion } from "framer-motion";
+import {
+  Bookmark, ClipboardList, HelpCircle, Info, LogOut,
+  ChevronRight, Phone, MapPin, Edit3,
+} from "lucide-react";
+import BottomNav from "@/components/BottomNav";
+
+const menuItems = [
+  { icon: Bookmark, label: "Saved Workers", href: "/saved", color: "text-primary" },
+  { icon: ClipboardList, label: "My Requests", href: "/requests", color: "text-blue-500" },
+  { icon: HelpCircle, label: "Help & Support", href: "#", color: "text-amber-500" },
+  { icon: Info, label: "About KaamMitra", href: "#", color: "text-muted-foreground" },
+];
+
+export default function ProfilePage() {
+  const [, setLocation] = useLocation();
+
+  return (
+    <div className="flex flex-col min-h-screen bg-background pb-20">
+      <div className="bg-primary px-5 pt-14 pb-8">
+        <div className="flex items-start justify-between mb-4">
+          <h1 className="text-xl font-bold text-white">Profile</h1>
+          <button
+            className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center"
+            data-testid="btn-edit-profile"
+          >
+            <Edit3 size={16} className="text-white" />
+          </button>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-white text-2xl font-bold">
+            RS
+          </div>
+          <div>
+            <h2 className="text-white text-lg font-bold">Rahul Sharma</h2>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <Phone size={12} className="text-white/70" />
+              <span className="text-white/70 text-xs">+91 98765 43210</span>
+            </div>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <MapPin size={12} className="text-white/70" />
+              <span className="text-white/70 text-xs">New Delhi</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-5 pt-5 flex-1">
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          {[
+            { label: "Requests", value: "5" },
+            { label: "Saved", value: "3" },
+            { label: "Completed", value: "1" },
+          ].map((stat) => (
+            <div key={stat.label} className="bg-white rounded-2xl border border-border p-3 text-center">
+              <p className="text-xl font-bold text-foreground">{stat.value}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-2xl border border-border overflow-hidden mb-4"
+        >
+          {menuItems.map(({ icon: Icon, label, href, color }, i) => (
+            <button
+              key={label}
+              onClick={() => setLocation(href)}
+              className={`w-full flex items-center gap-3 px-4 py-4 text-left hover:bg-muted transition-colors ${i !== menuItems.length - 1 ? "border-b border-border" : ""}`}
+              data-testid={`menu-${label.toLowerCase().replace(/\s+/g, "-")}`}
+            >
+              <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
+                <Icon size={18} className={color} />
+              </div>
+              <span className="flex-1 text-sm font-medium text-foreground">{label}</span>
+              <ChevronRight size={16} className="text-muted-foreground" />
+            </button>
+          ))}
+        </motion.div>
+
+        <button
+          onClick={() => setLocation("/welcome")}
+          className="w-full flex items-center gap-3 px-4 py-4 bg-red-50 rounded-2xl border border-red-100"
+          data-testid="btn-logout"
+        >
+          <div className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+            <LogOut size={18} className="text-red-500" />
+          </div>
+          <span className="flex-1 text-sm font-medium text-red-500">Logout</span>
+        </button>
+
+        <p className="text-center text-xs text-muted-foreground mt-6">KaamMitra v1.0.0</p>
+      </div>
+
+      <BottomNav />
+    </div>
+  );
+}

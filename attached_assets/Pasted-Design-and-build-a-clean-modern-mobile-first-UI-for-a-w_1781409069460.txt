@@ -1,0 +1,228 @@
+Design and build a clean, modern, mobile-first UI for a worker finder app named "KaamMitra".
+
+Important:
+
+* Focus ONLY on the mobile app frontend UI and screen design.
+* Do NOT build backend logic yet.
+* Do NOT build payment system.
+* Do NOT build admin panel yet.
+* Design the app in a way that it can later connect to Firebase and an Admin Panel.
+* Keep the UI professional, lightweight, beginner-friendly, and production-ready.
+* Use modern cards, rounded corners, proper spacing, clean typography, and intuitive navigation.
+* The design should feel similar to a real-world marketplace app.
+
+App Purpose:
+KaamMitra helps people find local workers and skilled professionals such as:
+
+* Plumber
+* Electrician
+* Carpenter
+* Mason
+* Painter
+* AC Technician
+* Welder
+* Labour
+* CCTV Installer
+* RO Technician
+* Home Cleaning Worker
+* Other local service providers
+
+Users can browse workers, view profiles, and directly contact them through phone call or WhatsApp.
+
+Design Style:
+
+* Mobile-first design
+* Clean and modern
+* Professional Indian service marketplace feel
+* Minimal color palette
+* Soft shadows and rounded cards
+* Fast and easy navigation
+* No cluttered UI
+* Production-ready appearance
+
+Create the following screens:
+
+1. Splash Screen
+
+* KaamMitra logo
+* Clean background
+* Professional loading feel
+
+2. Welcome Screen
+
+* Headline explaining the app
+* Subtitle
+* Get Started button
+
+3. Login / Signup Screen
+
+* Phone Number Login
+* Send OTP button
+* OTP Verification Screen
+* Modern and simple design
+
+4. Home Screen
+
+* Greeting section
+* Search bar
+* Location placeholder
+* Worker categories grid
+
+Example Categories:
+
+* Plumber
+
+* Electrician
+
+* Carpenter
+
+* Mason
+
+* Painter
+
+* AC Repair
+
+* Labour
+
+* Cleaning
+
+* Popular Workers section
+
+* Recently Added Workers section
+
+* Bottom Navigation
+
+5. Category Workers Screen
+
+* List of workers under selected category
+* Search and filter options
+* Worker cards
+
+Each Worker Card should contain:
+
+* Profile photo placeholder
+* Worker name
+* Profession
+* City
+* Experience badge
+* Verified badge placeholder
+* Call button
+* WhatsApp button
+
+6. Worker Detail Screen
+
+* Worker profile image
+* Name
+* Profession
+* City
+* Experience
+* About worker section
+* Services offered
+* Phone number placeholder
+* WhatsApp Contact button
+* Call Now button
+
+7. Search Screen
+
+* Search workers by:
+
+  * Name
+  * Profession
+  * City
+
+* Recent searches section
+
+* No results empty state
+
+8. Saved Workers Screen
+
+* List of bookmarked workers
+* Quick call button
+* Quick WhatsApp button
+
+9. My Requests Screen (UI Only)
+
+* User service requests list
+* Status badges
+
+Status Examples:
+
+* Pending
+* Approved
+* In Progress
+* Completed
+* Cancelled
+
+10. Request Detail Screen
+
+* Request information
+* Service category
+* Worker assigned placeholder
+* Status timeline placeholder
+
+11. Notifications Screen
+    Examples:
+
+* New worker added
+* Request approved
+* Worker assigned
+* Status updated
+
+12. Profile Screen
+
+* User name
+* Phone number
+* Saved address
+* Edit Profile button
+* Saved Workers button
+* Logout button
+
+13. Empty State Screens
+
+* No Workers Found
+* No Saved Workers
+* No Requests Yet
+* No Notifications Yet
+
+14. Bottom Navigation
+    Include:
+
+* Home
+* Search
+* Requests
+* Notifications
+* Profile
+
+15. Filters UI
+    Create modern filter options:
+
+* Category
+* City
+* Experience
+* Verified Workers
+
+16. Future Ready Structure
+    Design UI so it can later connect with:
+
+* Firebase Authentication
+* Firebase Firestore Database
+* Admin Approval System
+* Worker Verification System
+* Analytics Dashboard
+
+Important UX Rules:
+
+* Keep screens visually consistent
+* Use reusable components
+* Use realistic placeholder content
+* Connect all screens logically
+* Mobile responsiveness is mandatory
+* Make the app look polished enough for Play Store screenshots and demo videos
+
+Output Expectation:
+
+* Build all frontend screens
+* Add navigation between screens
+* Use reusable UI components
+* Organize code cleanly
+* Prepare architecture for future Firebase and Admin Panel integration
