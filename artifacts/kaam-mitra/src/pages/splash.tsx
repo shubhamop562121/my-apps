@@ -1,13 +1,12 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { Wrench } from "lucide-react";
 
 export default function SplashPage() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    const timer = setTimeout(() => setLocation("/welcome"), 2200);
+    const timer = setTimeout(() => setLocation("/welcome"), 2400);
     return () => clearTimeout(timer);
   }, [setLocation]);
 
@@ -27,8 +26,12 @@ export default function SplashPage() {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="flex flex-col items-center gap-4"
       >
-        <div className="w-24 h-24 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-sm">
-          <Wrench size={48} className="text-white" strokeWidth={1.5} />
+        <div className="w-32 h-32 bg-white rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden">
+          <img
+            src="/logo.png"
+            alt="KaamMitra"
+            className="w-full h-full object-contain"
+          />
         </div>
         <motion.div
           initial={{ y: 20, opacity: 0 }}
@@ -36,8 +39,7 @@ export default function SplashPage() {
           transition={{ delay: 0.3, duration: 0.5 }}
           className="text-center"
         >
-          <h1 className="text-4xl font-bold text-white tracking-tight">KaamMitra</h1>
-          <p className="text-white/70 text-sm mt-1 font-medium">Your Trusted Worker Partner</p>
+          <p className="text-white/70 text-sm mt-1 font-medium">सही काम, सही साथी</p>
         </motion.div>
       </motion.div>
 

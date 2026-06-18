@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { Wrench, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
 const features = [
   "Find verified local workers instantly",
@@ -18,12 +18,15 @@ export default function WelcomePage() {
           transition={{ duration: 0.5 }}
           className="flex flex-col items-center gap-3 mb-10"
         >
-          <div className="w-20 h-20 bg-primary rounded-3xl flex items-center justify-center shadow-lg">
-            <Wrench size={40} className="text-white" strokeWidth={1.5} />
+          <div className="w-28 h-28 bg-white rounded-3xl shadow-lg overflow-hidden border border-border">
+            <img
+              src="/logo.png"
+              alt="KaamMitra"
+              className="w-full h-full object-contain"
+            />
           </div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">KaamMitra</h1>
           <p className="text-muted-foreground text-sm text-center max-w-[260px]">
-            Your Trusted Worker Partner
+            सही काम, सही साथी
           </p>
         </motion.div>
 

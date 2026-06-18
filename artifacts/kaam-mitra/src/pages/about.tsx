@@ -33,11 +33,16 @@ export default function AboutPage() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-3xl border border-border p-6 text-center mb-5 shadow-sm"
         >
-          <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-2xl font-bold">KM</span>
+          <div className="w-24 h-24 rounded-3xl overflow-hidden mx-auto mb-4 border border-border shadow-sm">
+            <img
+              src="/logo.png"
+              alt="KaamMitra"
+              className="w-full h-full object-contain"
+            />
           </div>
           <h2 className="text-xl font-bold text-foreground">KaamMitra</h2>
-          <p className="text-xs text-muted-foreground mt-1">Version 1.0.0</p>
+          <p className="text-xs text-muted-foreground mt-0.5">सही काम, सही साथी</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">Version 1.0.0</p>
           <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
             KaamMitra connects households and businesses with trusted local skilled workers — plumbers, electricians, carpenters, and more — across India.
           </p>
