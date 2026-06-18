@@ -1,17 +1,17 @@
-import { useState } from "react";
 import { useLocation, useRoute } from "wouter";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, MapPin, Star, BadgeCheck, Phone, MessageCircle,
   Bookmark, Briefcase, Shield,
 } from "lucide-react";
-import { workers, savedWorkerIds } from "@/data/mockData";
+import { workers } from "@/data/mockData";
+import { useSaved } from "@/context/SavedContext";
 
 export default function WorkerDetailPage() {
   const [, setLocation] = useLocation();
   const [, params] = useRoute("/worker/:id");
   const worker = workers.find((w) => w.id === params?.id);
-  const [saved, setSaved] = useState(savedWorkerIds.includes(params?.id ?? ""));
+  const { isSaved, toggleSave } = useSaved();
 
   if (!worker) {
     return (
@@ -21,6 +21,7 @@ export default function WorkerDetailPage() {
     );
   }
 
+  const saved = isSaved(worker.id);
   const initials = worker.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
   const bgColors = ["bg-teal-100 text-teal-700", "bg-blue-100 text-blue-700", "bg-amber-100 text-amber-700", "bg-purple-100 text-purple-700", "bg-rose-100 text-rose-700"];
   const colorClass = bgColors[worker.id.charCodeAt(1) % bgColors.length];
@@ -37,7 +38,7 @@ export default function WorkerDetailPage() {
             <ArrowLeft size={20} className="text-white" />
           </button>
           <button
-            onClick={() => setSaved((s) => !s)}
+            onClick={() => toggleSave(worker.id)}
             className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center"
             data-testid="btn-save"
           >

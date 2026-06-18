@@ -1,27 +1,18 @@
-import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { MapPin, Bell, Search, ChevronRight } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import WorkerCard from "@/components/WorkerCard";
 import CategoryIcon from "@/components/CategoryIcon";
-import { workers, categories, savedWorkerIds } from "@/data/mockData";
+import { workers, categories } from "@/data/mockData";
+import { useSaved } from "@/context/SavedContext";
 
 const popularWorkers = workers.slice(0, 5);
 const recentWorkers = workers.slice(5, 9);
 
 export default function HomePage() {
   const [, setLocation] = useLocation();
-  const [saved, setSaved] = useState<Set<string>>(new Set(savedWorkerIds));
-
-  const toggleSave = (id: string) => {
-    setSaved((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
+  const { savedIds, toggleSave } = useSaved();
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-20">
@@ -58,67 +49,58 @@ export default function HomePage() {
       <div className="px-5 pt-6">
         <h2 className="text-base font-bold text-foreground mb-4">Categories</h2>
         <motion.div
-          className="grid grid-cols-4 gap-y-5 gap-x-2"
           initial="hidden"
-          animate="visible"
-          variants={{ visible: { transition: { staggerChildren: 0.05 } }, hidden: {} }}
+          animate="show"
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.04 } } }}
+          className="grid grid-cols-4 gap-3"
         >
           {categories.map((cat) => (
             <motion.div
               key={cat.slug}
-              variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+              variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+              onClick={() => setLocation(`/category/${cat.slug}`)}
+              className="flex flex-col items-center gap-1.5 cursor-pointer"
+              data-testid={`cat-${cat.slug}`}
             >
-              <CategoryIcon {...cat} />
+              <div className="w-14 h-14 rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center">
+                <CategoryIcon slug={cat.slug} size={26} />
+              </div>
+              <span className="text-[10px] font-medium text-muted-foreground text-center leading-tight">{cat.label}</span>
             </motion.div>
           ))}
         </motion.div>
       </div>
 
       <div className="px-5 pt-7">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-base font-bold text-foreground">Popular Workers</h2>
           <button
             onClick={() => setLocation("/search")}
-            className="flex items-center gap-1 text-primary text-xs font-semibold"
-            data-testid="btn-view-all-popular"
+            className="flex items-center gap-0.5 text-xs text-primary font-semibold"
           >
-            View All <ChevronRight size={14} />
+            See all <ChevronRight size={14} />
           </button>
         </div>
-        <div className="flex gap-3 overflow-x-auto pb-2 -mx-5 px-5 scrollbar-none">
-          {popularWorkers.map((w, i) => (
-            <motion.div
-              key={w.id}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.08 }}
-            >
-              <WorkerCard worker={w} horizontal />
-            </motion.div>
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none -mx-5 px-5">
+          {popularWorkers.map((w) => (
+            <div key={w.id} className="flex-shrink-0 w-[200px]">
+              <WorkerCard worker={w} horizontal saved={savedIds.has(w.id)} onToggleSave={toggleSave} />
+            </div>
           ))}
         </div>
       </div>
 
-      <div className="px-5 pt-7 pb-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-bold text-foreground">Recently Added</h2>
-          <button
-            onClick={() => setLocation("/search")}
-            className="flex items-center gap-1 text-primary text-xs font-semibold"
-            data-testid="btn-view-all-recent"
-          >
-            View All <ChevronRight size={14} />
-          </button>
-        </div>
+      <div className="px-5 pt-7 pb-2">
+        <h2 className="text-base font-bold text-foreground mb-4">Recently Added</h2>
         <div className="flex flex-col gap-3">
           {recentWorkers.map((w, i) => (
             <motion.div
               key={w.id}
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 + i * 0.08 }}
+              transition={{ delay: i * 0.07 }}
             >
-              <WorkerCard worker={w} saved={saved.has(w.id)} onToggleSave={toggleSave} />
+              <WorkerCard worker={w} saved={savedIds.has(w.id)} onToggleSave={toggleSave} />
             </motion.div>
           ))}
         </div>

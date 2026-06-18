@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import MobileFrame from "@/components/MobileFrame";
+import { SavedProvider } from "@/context/SavedContext";
 import SplashPage from "@/pages/splash";
 import WelcomePage from "@/pages/welcome";
 import LoginPage from "@/pages/login";
@@ -17,6 +18,9 @@ import RequestDetailPage from "@/pages/request-detail";
 import NotificationsPage from "@/pages/notifications";
 import ProfilePage from "@/pages/profile";
 import FiltersPage from "@/pages/filters";
+import AboutPage from "@/pages/about";
+import HelpPage from "@/pages/help";
+import EditAddressPage from "@/pages/edit-address";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -42,6 +46,9 @@ function Router() {
         <Route path="/notifications" component={NotificationsPage} />
         <Route path="/profile" component={ProfilePage} />
         <Route path="/filters" component={FiltersPage} />
+        <Route path="/about" component={AboutPage} />
+        <Route path="/help" component={HelpPage} />
+        <Route path="/edit-address" component={EditAddressPage} />
         <Route component={NotFound} />
       </Switch>
     </MobileFrame>
@@ -52,9 +59,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
+        <SavedProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Router />
+          </WouterRouter>
+        </SavedProvider>
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>

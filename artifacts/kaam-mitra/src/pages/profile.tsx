@@ -2,15 +2,15 @@ import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import {
   Bookmark, ClipboardList, HelpCircle, Info, LogOut,
-  ChevronRight, Phone, MapPin, Edit3,
+  ChevronRight, Phone, MapPin, Edit3, PenLine,
 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 
 const menuItems = [
   { icon: Bookmark, label: "Saved Workers", href: "/saved", color: "text-primary" },
   { icon: ClipboardList, label: "My Requests", href: "/requests", color: "text-blue-500" },
-  { icon: HelpCircle, label: "Help & Support", href: "#", color: "text-amber-500" },
-  { icon: Info, label: "About KaamMitra", href: "#", color: "text-muted-foreground" },
+  { icon: HelpCircle, label: "Help & Support", href: "/help", color: "text-amber-500" },
+  { icon: Info, label: "About KaamMitra", href: "/about", color: "text-muted-foreground" },
 ];
 
 export default function ProfilePage() {
@@ -22,6 +22,7 @@ export default function ProfilePage() {
         <div className="flex items-start justify-between mb-4">
           <h1 className="text-xl font-bold text-white">Profile</h1>
           <button
+            onClick={() => setLocation("/edit-address")}
             className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center"
             data-testid="btn-edit-profile"
           >
@@ -32,16 +33,21 @@ export default function ProfilePage() {
           <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-white text-2xl font-bold">
             RS
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <h2 className="text-white text-lg font-bold">Rahul Sharma</h2>
             <div className="flex items-center gap-1.5 mt-0.5">
               <Phone size={12} className="text-white/70" />
               <span className="text-white/70 text-xs">+91 98765 43210</span>
             </div>
-            <div className="flex items-center gap-1.5 mt-0.5">
+            <button
+              onClick={() => setLocation("/edit-address")}
+              className="flex items-center gap-1.5 mt-0.5 group"
+              data-testid="btn-edit-address"
+            >
               <MapPin size={12} className="text-white/70" />
-              <span className="text-white/70 text-xs">New Delhi</span>
-            </div>
+              <span className="text-white/70 text-xs group-hover:text-white transition-colors">New Delhi</span>
+              <PenLine size={10} className="text-white/50 group-hover:text-white/80 transition-colors" />
+            </button>
           </div>
         </div>
       </div>

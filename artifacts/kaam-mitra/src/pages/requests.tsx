@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { ClipboardList, Plus, Calendar, User } from "lucide-react";
+import { ArrowLeft, ClipboardList, Plus, Calendar, User } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import StatusBadge from "@/components/StatusBadge";
 import EmptyState from "@/components/EmptyState";
@@ -22,11 +22,20 @@ export default function RequestsPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-20">
-      <div className="bg-white border-b border-border px-5 pt-14 pb-4">
+      <div className="bg-white border-b border-border px-5 pt-14 pb-4 sticky top-0 z-10">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-foreground">My Requests</h1>
-            <p className="text-xs text-muted-foreground mt-0.5">{serviceRequests.length} total requests</p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setLocation(-1 as never)}
+              className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center"
+              data-testid="btn-back"
+            >
+              <ArrowLeft size={20} className="text-foreground" />
+            </button>
+            <div>
+              <h1 className="text-lg font-bold text-foreground">My Requests</h1>
+              <p className="text-xs text-muted-foreground mt-0.5">{serviceRequests.length} total requests</p>
+            </div>
           </div>
           <button
             className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center"

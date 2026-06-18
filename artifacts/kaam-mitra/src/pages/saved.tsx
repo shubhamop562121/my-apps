@@ -1,32 +1,24 @@
-import { useState } from "react";
+import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowLeft, Bookmark } from "lucide-react";
-import { useLocation } from "wouter";
 import BottomNav from "@/components/BottomNav";
 import WorkerCard from "@/components/WorkerCard";
 import EmptyState from "@/components/EmptyState";
-import { workers, savedWorkerIds } from "@/data/mockData";
+import { workers } from "@/data/mockData";
+import { useSaved } from "@/context/SavedContext";
 
 export default function SavedPage() {
   const [, setLocation] = useLocation();
-  const [savedIds, setSavedIds] = useState<Set<string>>(new Set(savedWorkerIds));
+  const { savedIds, toggleSave } = useSaved();
 
   const savedWorkers = workers.filter((w) => savedIds.has(w.id));
-
-  const toggleSave = (id: string) => {
-    setSavedIds((prev) => {
-      const next = new Set(prev);
-      next.delete(id);
-      return next;
-    });
-  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-20">
       <div className="bg-white border-b border-border px-5 pt-14 pb-4 sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setLocation("/home")}
+            onClick={() => setLocation(-1 as never)}
             className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center"
             data-testid="btn-back"
           >
