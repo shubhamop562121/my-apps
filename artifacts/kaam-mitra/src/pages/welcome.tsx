@@ -4,7 +4,7 @@ import { CheckCircle2 } from "lucide-react";
 
 const features = [
   "Find verified local workers instantly",
-  "Call or WhatsApp directly — no middlemen",
+  "Book appointments — no direct calls needed",
   "Plumbers, Electricians, Carpenters & more",
 ];
 

@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ChevronDown, Phone, MessageCircle, Mail } from "lucide-react";
+import { ArrowLeft, ChevronDown, Phone, Mail } from "lucide-react";
 
 const faqs = [
-  { q: "How do I find a worker?", a: "Go to the Home screen, browse categories or use Search. Tap on a worker card to view their profile, then call or WhatsApp them directly." },
+  { q: "How do I find a worker?", a: "Go to the Home screen, browse categories or use Search. Tap on a worker card to view their profile, then tap 'Book Appointment' to send a request." },
   { q: "Are the workers verified?", a: "Yes! Workers with a blue verified badge have been manually checked. We verify their ID and work experience before listing them on the platform." },
   { q: "How do I save a worker?", a: "Tap the bookmark icon on any worker card or their profile page. Saved workers appear in the Saved tab for quick access." },
-  { q: "How do I post a service request?", a: "Go to My Requests and tap the + button. Fill in the service type, description, and preferred date — we'll match you with available workers." },
-  { q: "Is KaamMitra free to use?", a: "Browsing and contacting workers is completely free for users. Workers pay a small subscription fee to be listed on the platform." },
-  { q: "How do I report a problem with a worker?", a: "Call our support number or send us an email. We take all reports seriously and investigate within 24 hours." },
+  { q: "How do I book an appointment?", a: "Tap 'Book Appointment' on any worker profile. Fill in your name, phone, address, description of work, and preferred date/time. Our team will confirm your appointment shortly." },
+  { q: "How will I know when my appointment is confirmed?", a: "Once you book, you'll see the status in 'My Appointments'. Our admin team will review, approve, and assign a worker — you'll see the status update in real time." },
+  { q: "Is KaamMitra free to use?", a: "Browsing and booking is completely free for users. Workers pay a small subscription fee to be listed on the platform." },
+  { q: "How do I report a problem with a worker?", a: "Email or call our support team. We take all reports seriously and investigate within 24 hours." },
 ];
 
 export default function HelpPage() {
@@ -83,18 +84,6 @@ export default function HelpPage() {
             <div>
               <p className="text-sm font-semibold text-foreground">Call Support</p>
               <p className="text-xs text-muted-foreground mt-0.5">+91 88000 00000 · Mon–Sat, 9am–6pm</p>
-            </div>
-          </a>
-          <a
-            href="https://wa.me/918800000000"
-            className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3 shadow-sm"
-          >
-            <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
-              <MessageCircle size={18} className="text-green-600" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">WhatsApp Support</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Chat with us anytime</p>
             </div>
           </a>
           <a
