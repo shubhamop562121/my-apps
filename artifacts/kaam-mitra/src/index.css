@@ -68,51 +68,51 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  /* Warm white background, earthy teal primary */
-  --background: 40 33% 98%; 
-  --foreground: 215 28% 17%;
-  --border: 214 32% 91%;
+  /* KaamMitra brand: orange primary, navy dark */
+  --background: 30 20% 98%;
+  --foreground: 222 47% 16%;
+  --border: 220 20% 91%;
   
   --card: 0 0% 100%;
-  --card-foreground: 215 28% 17%;
-  --card-border: 214 32% 91%;
+  --card-foreground: 222 47% 16%;
+  --card-border: 220 20% 91%;
   
-  --sidebar: 40 33% 98%;
-  --sidebar-foreground: 215 28% 17%;
-  --sidebar-border: 214 32% 91%;
-  --sidebar-primary: 172 78% 27%;
+  --sidebar: 30 20% 98%;
+  --sidebar-foreground: 222 47% 16%;
+  --sidebar-border: 220 20% 91%;
+  --sidebar-primary: 29 91% 52%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 40 33% 94%;
-  --sidebar-accent-foreground: 215 28% 17%;
-  --sidebar-ring: 172 78% 27%;
+  --sidebar-accent: 30 30% 94%;
+  --sidebar-accent-foreground: 222 47% 16%;
+  --sidebar-ring: 29 91% 52%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 215 28% 17%;
-  --popover-border: 214 32% 91%;
+  --popover-foreground: 222 47% 16%;
+  --popover-border: 220 20% 91%;
 
-  --primary: 172 78% 27%;
+  --primary: 29 91% 52%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 40 50% 90%;
-  --secondary-foreground: 172 78% 20%;
+  --secondary: 30 40% 92%;
+  --secondary-foreground: 222 47% 20%;
 
-  --muted: 214 32% 91%;
-  --muted-foreground: 215 16% 47%;
+  --muted: 220 20% 93%;
+  --muted-foreground: 220 14% 46%;
 
-  --accent: 38 92% 50%; /* Warm golden accent */
-  --accent-foreground: 215 28% 17%;
+  --accent: 222 51% 24%; /* Navy accent */
+  --accent-foreground: 0 0% 100%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 214 32% 91%;
-  --ring: 172 78% 27%;
+  --input: 220 20% 91%;
+  --ring: 29 91% 52%;
 
-  --chart-1: 172 78% 27%;
-  --chart-2: 38 92% 50%;
+  --chart-1: 29 91% 52%;
+  --chart-2: 222 51% 30%;
   --chart-3: 20 80% 50%;
   --chart-4: 280 80% 50%;
-  --chart-5: 320 80% 50%;
+  --chart-5: 172 78% 30%;
 
   --app-font-sans: 'Outfit', 'Inter', sans-serif;
   --app-font-serif: Georgia, serif;
@@ -147,50 +147,50 @@
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
 
-  --background: 215 28% 10%;
+  --background: 222 40% 10%;
   --foreground: 0 0% 98%;
-  --border: 215 28% 17%;
+  --border: 222 32% 18%;
   
-  --card: 215 28% 12%;
+  --card: 222 40% 13%;
   --card-foreground: 0 0% 98%;
-  --card-border: 215 28% 17%;
+  --card-border: 222 32% 18%;
   
-  --sidebar: 215 28% 12%;
+  --sidebar: 222 40% 13%;
   --sidebar-foreground: 0 0% 98%;
-  --sidebar-border: 215 28% 17%;
-  --sidebar-primary: 172 78% 35%;
+  --sidebar-border: 222 32% 18%;
+  --sidebar-primary: 29 91% 58%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 215 28% 17%;
+  --sidebar-accent: 222 32% 18%;
   --sidebar-accent-foreground: 0 0% 98%;
-  --sidebar-ring: 172 78% 35%;
+  --sidebar-ring: 29 91% 58%;
 
-  --popover: 215 28% 12%;
+  --popover: 222 40% 13%;
   --popover-foreground: 0 0% 98%;
-  --popover-border: 215 28% 17%;
+  --popover-border: 222 32% 18%;
 
-  --primary: 172 78% 40%;
+  --primary: 29 91% 58%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 215 28% 17%;
+  --secondary: 222 32% 18%;
   --secondary-foreground: 0 0% 98%;
 
-  --muted: 215 28% 17%;
-  --muted-foreground: 215 16% 65%;
+  --muted: 222 32% 18%;
+  --muted-foreground: 220 14% 65%;
 
-  --accent: 38 92% 50%;
-  --accent-foreground: 215 28% 10%;
+  --accent: 222 51% 40%;
+  --accent-foreground: 0 0% 100%;
 
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
 
-  --input: 215 28% 20%;
-  --ring: 172 78% 40%;
+  --input: 222 32% 20%;
+  --ring: 29 91% 58%;
 
-  --chart-1: 172 78% 40%;
-  --chart-2: 38 92% 50%;
+  --chart-1: 29 91% 58%;
+  --chart-2: 222 51% 40%;
   --chart-3: 20 80% 50%;
   --chart-4: 280 80% 50%;
-  --chart-5: 320 80% 50%;
+  --chart-5: 172 78% 40%;
   
   --shadow-2xs: 0px 2px 0px 0px rgba(0,0,0,0.1);
   --shadow-xs: 0px 2px 0px 0px rgba(0,0,0,0.15);
