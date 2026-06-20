@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { getAdminCreds } from "@/context/AuthContext";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 
 export default function LoginPage() {
   const { login } = useAuth();
-  const [email, setEmail] = useState("admin@kaammitra.in");
-  const [password, setPassword] = useState("admin123");
+  const saved = getAdminCreds();
+  const [email, setEmail] = useState(saved.email);
+  const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,7 +18,7 @@ export default function LoginPage() {
     setLoading(true);
     const ok = await login(email, password);
     setLoading(false);
-    if (!ok) setError("Invalid credentials. Try admin@kaammitra.in / admin123");
+    if (!ok) setError("Incorrect email or password. Please try again.");
   };
 
   const inputCls = "w-full bg-white border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition";
@@ -39,7 +41,7 @@ export default function LoginPage() {
               <input
                 type="email"
                 className={inputCls}
-                placeholder="admin@kaammitra.in"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -79,10 +81,6 @@ export default function LoginPage() {
               {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
-
-          <p className="text-center text-xs text-muted-foreground mt-4">
-            Demo: <span className="font-mono text-foreground">admin@kaammitra.in</span> / <span className="font-mono text-foreground">admin123</span>
-          </p>
         </div>
       </div>
     </div>

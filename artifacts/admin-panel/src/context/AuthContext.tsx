@@ -8,6 +8,22 @@ type AuthContextType = {
   logout: () => void;
 };
 
+const CREDS_KEY = "km_admin_creds";
+const DEFAULT_EMAIL = "admin@kaammitra.in";
+const DEFAULT_PASSWORD = "admin123";
+
+export function getAdminCreds(): { email: string; password: string } {
+  try {
+    const raw = localStorage.getItem(CREDS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { email: DEFAULT_EMAIL, password: DEFAULT_PASSWORD };
+}
+
+export function saveAdminCreds(email: string, password: string) {
+  localStorage.setItem(CREDS_KEY, JSON.stringify({ email, password }));
+}
+
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -17,7 +33,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    if (email === "admin@kaammitra.in" && password === "admin123") {
+    const creds = getAdminCreds();
+    if (email === creds.email && password === creds.password) {
       const user = { email, name: "Admin" };
       setAdmin(user);
       sessionStorage.setItem("km_admin", JSON.stringify(user));
