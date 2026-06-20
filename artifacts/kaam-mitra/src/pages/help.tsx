@@ -3,6 +3,16 @@ import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ChevronDown, Phone, Mail } from "lucide-react";
 
+const STORAGE_KEY = "km_contact_settings";
+
+function getContactSettings() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { supportEmail: "support@kaammitra.in", supportPhone: "+91 88000 00000", supportHours: "Mon–Sat, 9am–6pm" };
+}
+
 const faqs = [
   { q: "How do I find a worker?", a: "Go to the Home screen, browse categories or use Search. Tap on a worker card to view their profile, then tap 'Book Appointment' to send a request." },
   { q: "Are the workers verified?", a: "Yes! Workers with a blue verified badge have been manually checked. We verify their ID and work experience before listing them on the platform." },
@@ -16,6 +26,7 @@ const faqs = [
 export default function HelpPage() {
   const [, setLocation] = useLocation();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const contact = getContactSettings();
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -75,7 +86,7 @@ export default function HelpPage() {
         <h3 className="text-sm font-bold text-foreground mb-3 px-1">Contact Us</h3>
         <div className="flex flex-col gap-3">
           <a
-            href="tel:+918800000000"
+            href={`tel:${contact.supportPhone.replace(/\s/g, "")}`}
             className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3 shadow-sm"
           >
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -83,11 +94,11 @@ export default function HelpPage() {
             </div>
             <div>
               <p className="text-sm font-semibold text-foreground">Call Support</p>
-              <p className="text-xs text-muted-foreground mt-0.5">+91 88000 00000 · Mon–Sat, 9am–6pm</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{contact.supportPhone} · {contact.supportHours}</p>
             </div>
           </a>
           <a
-            href="mailto:support@kaammitra.in"
+            href={`mailto:${contact.supportEmail}`}
             className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3 shadow-sm"
           >
             <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
@@ -95,7 +106,7 @@ export default function HelpPage() {
             </div>
             <div>
               <p className="text-sm font-semibold text-foreground">Email Us</p>
-              <p className="text-xs text-muted-foreground mt-0.5">support@kaammitra.in</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{contact.supportEmail}</p>
             </div>
           </a>
         </div>
