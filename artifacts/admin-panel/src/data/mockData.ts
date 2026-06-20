@@ -1,0 +1,133 @@
+export type Worker = {
+  id: string; name: string; phone: string; category: string; city: string;
+  experience: number; rating: number; reviewCount: number; status: "active" | "inactive";
+  verified: boolean; joinedAt: string; description: string;
+};
+
+export type User = {
+  id: string; name: string; phone: string; city: string;
+  status: "active" | "blocked"; registeredAt: string; totalRequests: number;
+};
+
+export type Category = {
+  id: string; name: string; icon: string; workerCount: number; status: "active" | "inactive";
+};
+
+export type City = {
+  id: string; name: string; state: string; workerCount: number; status: "active" | "inactive";
+};
+
+export type Review = {
+  id: string; workerName: string; userName: string; rating: number;
+  comment: string; createdAt: string; status: "approved" | "pending" | "removed";
+};
+
+export type Ad = {
+  id: string; title: string; imageUrl: string; linkUrl: string;
+  position: string; status: "active" | "inactive"; startDate: string; endDate: string;
+};
+
+export type Message = {
+  id: string; name: string; phone: string; subject: string;
+  message: string; createdAt: string; status: "open" | "resolved";
+};
+
+export const workers: Worker[] = [
+  { id: "w1", name: "Ramesh Kumar", phone: "+91 98765 43210", category: "Plumber", city: "New Delhi", experience: 8, rating: 4.8, reviewCount: 124, status: "active", verified: true, joinedAt: "2024-01-10", description: "Expert plumber with 8 years experience." },
+  { id: "w2", name: "Suresh Sharma", phone: "+91 87654 32109", category: "Electrician", city: "Mumbai", experience: 6, rating: 4.6, reviewCount: 98, status: "active", verified: true, joinedAt: "2024-01-15", description: "Certified electrician." },
+  { id: "w3", name: "Dinesh Patel", phone: "+91 76543 21098", category: "AC Repair", city: "Ahmedabad", experience: 5, rating: 4.5, reviewCount: 76, status: "active", verified: false, joinedAt: "2024-02-01", description: "AC repair specialist." },
+  { id: "w4", name: "Mahesh Yadav", phone: "+91 65432 10987", category: "Carpenter", city: "Lucknow", experience: 10, rating: 4.9, reviewCount: 203, status: "active", verified: true, joinedAt: "2023-11-05", description: "Expert carpenter." },
+  { id: "w5", name: "Ravi Gupta", phone: "+91 54321 09876", category: "Painter", city: "Jaipur", experience: 4, rating: 4.3, reviewCount: 55, status: "inactive", verified: false, joinedAt: "2024-03-10", description: "Interior/exterior painter." },
+  { id: "w6", name: "Ajay Singh", phone: "+91 43210 98765", category: "Mason", city: "Chandigarh", experience: 12, rating: 4.7, reviewCount: 167, status: "active", verified: true, joinedAt: "2023-09-20", description: "Skilled mason." },
+  { id: "w7", name: "Vikram Nair", phone: "+91 32109 87654", category: "Welder", city: "Bangalore", experience: 7, rating: 4.4, reviewCount: 89, status: "active", verified: true, joinedAt: "2024-01-25", description: "Expert welder." },
+  { id: "w8", name: "Praveen Das", phone: "+91 21098 76543", category: "CCTV", city: "Hyderabad", experience: 5, rating: 4.6, reviewCount: 112, status: "active", verified: true, joinedAt: "2024-02-14", description: "CCTV installation expert." },
+  { id: "w9", name: "Santosh Mishra", phone: "+91 10987 65432", category: "RO Repair", city: "Bhopal", experience: 3, rating: 4.2, reviewCount: 43, status: "inactive", verified: false, joinedAt: "2024-04-01", description: "RO water purifier technician." },
+  { id: "w10", name: "Harish Tiwari", phone: "+91 98760 12345", category: "Cleaning", city: "Pune", experience: 6, rating: 4.5, reviewCount: 78, status: "active", verified: true, joinedAt: "2024-01-30", description: "Deep cleaning specialist." },
+];
+
+export const users: User[] = [
+  { id: "u1", name: "Rahul Sharma", phone: "+91 98765 43210", city: "New Delhi", status: "active", registeredAt: "2024-01-05", totalRequests: 5 },
+  { id: "u2", name: "Priya Verma", phone: "+91 87654 32109", city: "Mumbai", status: "active", registeredAt: "2024-01-12", totalRequests: 3 },
+  { id: "u3", name: "Amit Joshi", phone: "+91 76543 21098", city: "Bangalore", status: "blocked", registeredAt: "2024-02-03", totalRequests: 1 },
+  { id: "u4", name: "Sneha Patel", phone: "+91 65432 10987", city: "Ahmedabad", status: "active", registeredAt: "2024-02-15", totalRequests: 8 },
+  { id: "u5", name: "Kiran Singh", phone: "+91 54321 09876", city: "Jaipur", status: "active", registeredAt: "2024-03-01", totalRequests: 2 },
+  { id: "u6", name: "Deepak Kumar", phone: "+91 43210 98765", city: "Lucknow", status: "active", registeredAt: "2024-03-10", totalRequests: 4 },
+  { id: "u7", name: "Anita Rao", phone: "+91 32109 87654", city: "Hyderabad", status: "active", registeredAt: "2024-03-20", totalRequests: 6 },
+  { id: "u8", name: "Rajesh Nair", phone: "+91 21098 76543", city: "Chennai", status: "blocked", registeredAt: "2024-04-02", totalRequests: 0 },
+];
+
+export const categories: Category[] = [
+  { id: "c1", name: "Plumber", icon: "💧", workerCount: 45, status: "active" },
+  { id: "c2", name: "Electrician", icon: "⚡", workerCount: 52, status: "active" },
+  { id: "c3", name: "Carpenter", icon: "🪚", workerCount: 38, status: "active" },
+  { id: "c4", name: "Painter", icon: "🎨", workerCount: 29, status: "active" },
+  { id: "c5", name: "Mason", icon: "🧱", workerCount: 24, status: "active" },
+  { id: "c6", name: "AC Repair", icon: "❄️", workerCount: 31, status: "active" },
+  { id: "c7", name: "Welder", icon: "🔥", workerCount: 18, status: "active" },
+  { id: "c8", name: "Labour", icon: "👷", workerCount: 67, status: "active" },
+  { id: "c9", name: "CCTV", icon: "📷", workerCount: 22, status: "inactive" },
+  { id: "c10", name: "RO Repair", icon: "💦", workerCount: 15, status: "active" },
+  { id: "c11", name: "Cleaning", icon: "🧹", workerCount: 40, status: "active" },
+];
+
+export const cities: City[] = [
+  { id: "ct1", name: "New Delhi", state: "Delhi", workerCount: 120, status: "active" },
+  { id: "ct2", name: "Mumbai", state: "Maharashtra", workerCount: 98, status: "active" },
+  { id: "ct3", name: "Bangalore", state: "Karnataka", workerCount: 87, status: "active" },
+  { id: "ct4", name: "Hyderabad", state: "Telangana", workerCount: 65, status: "active" },
+  { id: "ct5", name: "Chennai", state: "Tamil Nadu", workerCount: 54, status: "active" },
+  { id: "ct6", name: "Jaipur", state: "Rajasthan", workerCount: 43, status: "active" },
+  { id: "ct7", name: "Lucknow", state: "Uttar Pradesh", workerCount: 39, status: "active" },
+  { id: "ct8", name: "Ahmedabad", state: "Gujarat", workerCount: 51, status: "active" },
+  { id: "ct9", name: "Chandigarh", state: "Punjab", workerCount: 28, status: "inactive" },
+  { id: "ct10", name: "Pune", state: "Maharashtra", workerCount: 44, status: "active" },
+];
+
+export const reviews: Review[] = [
+  { id: "r1", workerName: "Ramesh Kumar", userName: "Rahul Sharma", rating: 5, comment: "Excellent work! Fixed the leakage within 30 minutes.", createdAt: "2024-04-10", status: "approved" },
+  { id: "r2", workerName: "Suresh Sharma", userName: "Priya Verma", rating: 4, comment: "Good job, professional behavior.", createdAt: "2024-04-12", status: "approved" },
+  { id: "r3", workerName: "Dinesh Patel", userName: "Amit Joshi", rating: 3, comment: "AC working but took too long.", createdAt: "2024-04-15", status: "pending" },
+  { id: "r4", workerName: "Mahesh Yadav", userName: "Sneha Patel", rating: 5, comment: "Amazing carpentry work. Highly recommend!", createdAt: "2024-04-18", status: "approved" },
+  { id: "r5", workerName: "Ravi Gupta", userName: "Kiran Singh", rating: 2, comment: "Paint quality was poor.", createdAt: "2024-04-20", status: "pending" },
+  { id: "r6", workerName: "Ajay Singh", userName: "Deepak Kumar", rating: 5, comment: "Built our boundary wall perfectly.", createdAt: "2024-04-22", status: "approved" },
+  { id: "r7", workerName: "Vikram Nair", userName: "Anita Rao", rating: 1, comment: "Very rude behavior. Not recommended.", createdAt: "2024-04-25", status: "removed" },
+];
+
+export const ads: Ad[] = [
+  { id: "a1", title: "Summer Sale Banner", imageUrl: "https://placehold.co/800x200/1D4ED8/FFFFFF?text=Summer+Sale", linkUrl: "https://kaammitra.in/sale", position: "Home Top", status: "active", startDate: "2024-04-01", endDate: "2024-06-30" },
+  { id: "a2", title: "Electrician Special", imageUrl: "https://placehold.co/800x200/16A34A/FFFFFF?text=Electrician+Special", linkUrl: "https://kaammitra.in/electric", position: "Category Page", status: "active", startDate: "2024-04-15", endDate: "2024-05-15" },
+  { id: "a3", title: "Monsoon Plumbing", imageUrl: "https://placehold.co/800x200/0891B2/FFFFFF?text=Monsoon+Ready", linkUrl: "https://kaammitra.in/plumbing", position: "Home Bottom", status: "inactive", startDate: "2024-06-01", endDate: "2024-08-31" },
+];
+
+export const messages: Message[] = [
+  { id: "m1", name: "Rahul Sharma", phone: "+91 98765 43210", subject: "App not working", message: "I am unable to login to the app. Please help.", createdAt: "2024-04-10", status: "resolved" },
+  { id: "m2", name: "Priya Verma", phone: "+91 87654 32109", subject: "Worker not responding", message: "The worker I contacted is not picking up calls.", createdAt: "2024-04-12", status: "open" },
+  { id: "m3", name: "Amit Joshi", phone: "+91 76543 21098", subject: "Wrong category listed", message: "The plumber showed up but said he only does electrical work.", createdAt: "2024-04-14", status: "open" },
+  { id: "m4", name: "Sneha Patel", phone: "+91 65432 10987", subject: "Refund request", message: "Worker did not complete the job but I was charged.", createdAt: "2024-04-16", status: "open" },
+  { id: "m5", name: "Kiran Singh", phone: "+91 54321 09876", subject: "Great experience", message: "Just wanted to say thank you, excellent service!", createdAt: "2024-04-18", status: "resolved" },
+];
+
+export const dashboardStats = {
+  totalUsers: 8,
+  totalWorkers: 10,
+  totalCategories: 11,
+  totalCities: 10,
+  totalReviews: 7,
+  activeAds: 2,
+  monthlyGrowth: [
+    { month: "Jan", users: 2, workers: 3 },
+    { month: "Feb", users: 2, workers: 2 },
+    { month: "Mar", users: 3, workers: 2 },
+    { month: "Apr", users: 1, workers: 3 },
+  ],
+  workersByCategory: [
+    { category: "Labour", count: 67 },
+    { category: "Electrician", count: 52 },
+    { category: "Plumber", count: 45 },
+    { category: "Cleaning", count: 40 },
+    { category: "Carpenter", count: 38 },
+    { category: "Others", count: 84 },
+  ],
+  recentWorkers: workers.slice(0, 5),
+  recentUsers: users.slice(0, 5),
+};

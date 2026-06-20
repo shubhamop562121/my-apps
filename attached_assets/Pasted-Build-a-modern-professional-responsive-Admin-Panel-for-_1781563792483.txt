@@ -1,0 +1,147 @@
+Build a modern, professional, responsive Admin Panel for my Worker Finder application named "KaamMitra".
+
+Purpose:
+This admin panel will manage workers, users, cities, categories, reviews, advertisements, and app settings. The admin panel should connect with Firebase Authentication and Firebase Firestore Database.
+
+Design Requirements:
+
+* Clean modern dashboard UI
+* Mobile responsive and desktop responsive
+* Professional color scheme (Blue, White, Green)
+* Sidebar navigation
+* Dashboard cards and analytics
+* Fast loading
+* Easy-to-use interface
+
+Authentication:
+
+* Secure Admin Login Page
+* Email and Password login
+* Forgot Password option
+* Protected admin routes
+* Logout functionality
+
+Dashboard:
+Display:
+
+* Total Users
+* Total Workers
+* Total Categories
+* Total Cities
+* Total Reviews
+* Total Active Ads
+* Recent Registrations
+* Recent Worker Additions
+
+Worker Management:
+
+* Add Worker
+* Edit Worker
+* Delete Worker
+* Search Worker
+* Filter by City
+* Filter by Category
+* Worker Status (Active/Inactive)
+* Worker Profile Image
+* Worker Name
+* Mobile Number
+* Category
+* City
+* Experience
+* Description
+* Rating
+
+User Management:
+
+* View Users
+* Search Users
+* Block User
+* Unblock User
+* Delete User
+* View Registration Date
+
+Category Management:
+
+* Add Category
+* Edit Category
+* Delete Category
+* Category Icon Upload
+
+City Management:
+
+* Add City
+* Edit City
+* Delete City
+* Enable/Disable City
+
+Review Management:
+
+* View Reviews
+* Delete Reviews
+* Review Rating Display
+* Review Moderation
+
+Advertisement Management:
+
+* Add Banner Ads
+* Edit Banner Ads
+* Delete Banner Ads
+* Upload Banner Image
+* Activate/Deactivate Ads
+
+Contact Messages:
+
+* View User Queries
+* Mark as Resolved
+* Delete Messages
+
+App Settings:
+
+* App Name
+* Logo Upload
+* Contact Information
+* About Us
+* Privacy Policy
+* Terms & Conditions
+
+Firebase Integration:
+Use Firebase services:
+
+* Firebase Authentication
+* Firebase Firestore Database
+* Firebase Storage
+
+Firestore Collections:
+
+admins
+users
+workers
+categories
+cities
+reviews
+ads
+messages
+settings
+
+Dashboard Analytics:
+
+* Worker Count by Category
+* User Growth Chart
+* Worker Growth Chart
+* Recent Activities
+
+Technology:
+Frontend:
+
+* React
+* TypeScript
+* Tailwind CSS
+* Shadcn UI
+
+Backend:
+
+* Firebase
+
+Create all pages, routing, components, forms, tables, modals, filters, and Firebase-ready structure.
+
+Generate a complete production-ready admin panel UI with dummy Firebase data so real Firebase keys can be connected later.
