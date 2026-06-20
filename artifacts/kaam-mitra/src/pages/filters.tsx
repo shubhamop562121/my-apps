@@ -33,7 +33,7 @@ export default function FiltersPage() {
       <div className="bg-white border-b border-border px-5 pt-14 pb-4 sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setLocation(-1 as never)}
+            onClick={() => window.history.back()}
             className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center"
             data-testid="btn-back"
           >
@@ -131,7 +131,7 @@ export default function FiltersPage() {
 
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-border px-5 py-4">
         <button
-          onClick={() => setLocation(-1 as never)}
+          onClick={() => window.history.back()}
           className="w-full bg-primary text-primary-foreground py-4 rounded-2xl font-semibold text-base"
           data-testid="btn-apply-filters"
         >

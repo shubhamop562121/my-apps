@@ -18,7 +18,7 @@ export default function SavedPage() {
       <div className="bg-white border-b border-border px-5 pt-14 pb-4 sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setLocation(-1 as never)}
+            onClick={() => window.history.back()}
             className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center"
             data-testid="btn-back"
           >

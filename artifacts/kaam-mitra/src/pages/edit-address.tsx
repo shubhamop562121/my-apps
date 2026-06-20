@@ -20,7 +20,7 @@ export default function EditAddressPage() {
 
   const handleSave = () => {
     setSaved(true);
-    setTimeout(() => setLocation(-1 as never), 900);
+    setTimeout(() => window.history.back(), 900);
   };
 
   const inputCls = "w-full bg-white border border-border rounded-2xl px-4 py-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition";
@@ -30,7 +30,7 @@ export default function EditAddressPage() {
       <div className="bg-primary px-5 pt-14 pb-6">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setLocation(-1 as never)}
+            onClick={() => window.history.back()}
             className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center"
             data-testid="btn-back"
           >

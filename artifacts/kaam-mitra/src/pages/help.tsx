@@ -21,7 +21,7 @@ export default function HelpPage() {
       <div className="bg-primary px-5 pt-14 pb-6">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setLocation(-1 as never)}
+            onClick={() => window.history.back()}
             className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center"
             data-testid="btn-back"
           >

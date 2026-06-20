@@ -31,7 +31,7 @@ export default function WorkerDetailPage() {
       <div className="relative bg-primary pt-14 pb-20 px-5">
         <div className="flex items-center justify-between">
           <button
-            onClick={() => setLocation(-1 as never)}
+            onClick={() => window.history.back()}
             className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center"
             data-testid="btn-back"
           >
