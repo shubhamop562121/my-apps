@@ -32,6 +32,23 @@ export type Message = {
   message: string; createdAt: string; status: "open" | "resolved";
 };
 
+export type Appointment = {
+  id: string;
+  userName: string;
+  userPhone: string;
+  address: string;
+  category: string;
+  workerName: string;
+  description: string;
+  preferredDate: string;
+  preferredTime: string;
+  status: "Pending" | "Approved" | "Assigned" | "In Progress" | "Completed" | "Rejected";
+  assignedWorkerName?: string;
+  assignedWorkerId?: string;
+  bookedAt: string;
+  note?: string;
+};
+
 export const workers: Worker[] = [
   { id: "w1", name: "Ramesh Kumar", phone: "+91 98765 43210", category: "Plumber", city: "New Delhi", experience: 8, rating: 4.8, reviewCount: 124, status: "active", verified: true, joinedAt: "2024-01-10", description: "Expert plumber with 8 years experience." },
   { id: "w2", name: "Suresh Sharma", phone: "+91 87654 32109", category: "Electrician", city: "Mumbai", experience: 6, rating: 4.6, reviewCount: 98, status: "active", verified: true, joinedAt: "2024-01-15", description: "Certified electrician." },
@@ -107,6 +124,16 @@ export const messages: Message[] = [
   { id: "m5", name: "Kiran Singh", phone: "+91 54321 09876", subject: "Great experience", message: "Just wanted to say thank you, excellent service!", createdAt: "2024-04-18", status: "resolved" },
 ];
 
+export const appointments: Appointment[] = [
+  { id: "apt1", userName: "Rahul Sharma", userPhone: "+91 98765 43210", address: "45, Lajpat Nagar, New Delhi", category: "Plumber", workerName: "Ramesh Kumar", description: "Kitchen sink leaking, needs urgent repair", preferredDate: "2024-06-22", preferredTime: "10:00 AM", status: "Pending", bookedAt: "2024-06-20" },
+  { id: "apt2", userName: "Priya Verma", userPhone: "+91 87654 32109", address: "12, Andheri West, Mumbai", category: "Electrician", workerName: "Suresh Sharma", description: "Main switch board replacement needed", preferredDate: "2024-06-23", preferredTime: "2:00 PM", status: "Pending", bookedAt: "2024-06-20" },
+  { id: "apt3", userName: "Sneha Patel", userPhone: "+91 65432 10987", address: "78, Satellite, Ahmedabad", category: "AC Repair", workerName: "Dinesh Patel", description: "AC not cooling properly, gas may be low", preferredDate: "2024-06-23", preferredTime: "11:00 AM", status: "Approved", bookedAt: "2024-06-19" },
+  { id: "apt4", userName: "Deepak Kumar", userPhone: "+91 43210 98765", address: "23, Gomti Nagar, Lucknow", category: "Carpenter", workerName: "Mahesh Yadav", description: "Need custom wardrobe for bedroom", preferredDate: "2024-06-24", preferredTime: "9:00 AM", status: "Assigned", assignedWorkerName: "Mahesh Yadav", assignedWorkerId: "w4", bookedAt: "2024-06-18" },
+  { id: "apt5", userName: "Anita Rao", userPhone: "+91 32109 87654", address: "56, Banjara Hills, Hyderabad", category: "Cleaning", workerName: "Harish Tiwari", description: "Deep cleaning for 3BHK apartment before moving", preferredDate: "2024-06-20", preferredTime: "8:00 AM", status: "In Progress", assignedWorkerName: "Harish Tiwari", assignedWorkerId: "w10", bookedAt: "2024-06-17" },
+  { id: "apt6", userName: "Kiran Singh", userPhone: "+91 54321 09876", address: "11, C-Scheme, Jaipur", category: "Mason", workerName: "Ajay Singh", description: "Repair crack in boundary wall", preferredDate: "2024-06-15", preferredTime: "10:00 AM", status: "Completed", assignedWorkerName: "Ajay Singh", assignedWorkerId: "w6", bookedAt: "2024-06-13" },
+  { id: "apt7", userName: "Amit Joshi", userPhone: "+91 76543 21098", address: "34, Koramangala, Bangalore", category: "Welder", workerName: "Vikram Nair", description: "Gate repair and welding work", preferredDate: "2024-06-25", preferredTime: "3:00 PM", status: "Rejected", bookedAt: "2024-06-19", note: "Worker not available on that date" },
+];
+
 export const dashboardStats = {
   totalUsers: 8,
   totalWorkers: 10,
@@ -114,6 +141,7 @@ export const dashboardStats = {
   totalCities: 10,
   totalReviews: 7,
   activeAds: 2,
+  pendingAppointments: appointments.filter((a) => a.status === "Pending").length,
   monthlyGrowth: [
     { month: "Jan", users: 2, workers: 3 },
     { month: "Feb", users: 2, workers: 2 },

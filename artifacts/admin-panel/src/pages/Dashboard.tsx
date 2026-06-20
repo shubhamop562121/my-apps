@@ -1,4 +1,4 @@
-import { Users, HardHat, Grid3x3, MapPin, Star, Megaphone, TrendingUp, UserPlus } from "lucide-react";
+import { Users, HardHat, Grid3x3, MapPin, Star, Megaphone, TrendingUp, UserPlus, CalendarCheck } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import Layout from "@/components/Layout";
 import StatCard from "@/components/StatCard";
@@ -11,13 +11,17 @@ export default function Dashboard() {
   return (
     <Layout title="Dashboard">
       <div className="space-y-6">
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           <StatCard title="Total Users" value={dashboardStats.totalUsers} icon={Users} color="text-blue-600" bg="bg-blue-100" change="+2 this week" />
           <StatCard title="Total Workers" value={dashboardStats.totalWorkers} icon={HardHat} color="text-green-600" bg="bg-green-100" change="+3 this week" />
           <StatCard title="Categories" value={dashboardStats.totalCategories} icon={Grid3x3} color="text-purple-600" bg="bg-purple-100" />
-          <StatCard title="Cities" value={dashboardStats.totalCities} icon={MapPin} color="text-amber-600" bg="bg-amber-100" />
+          <StatCard title="Pending Appts." value={dashboardStats.pendingAppointments} icon={CalendarCheck} color="text-amber-600" bg="bg-amber-100" change="Needs review" />
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard title="Cities" value={dashboardStats.totalCities} icon={MapPin} color="text-teal-600" bg="bg-teal-100" />
           <StatCard title="Reviews" value={dashboardStats.totalReviews} icon={Star} color="text-yellow-500" bg="bg-yellow-100" />
           <StatCard title="Active Ads" value={dashboardStats.activeAds} icon={Megaphone} color="text-red-600" bg="bg-red-100" />
+          <StatCard title="Total Appointments" value={7} icon={CalendarCheck} color="text-indigo-600" bg="bg-indigo-100" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

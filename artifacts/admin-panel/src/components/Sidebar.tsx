@@ -1,12 +1,14 @@
 import { useLocation } from "wouter";
 import {
   LayoutDashboard, Users, HardHat, Grid3x3, MapPin,
-  Star, Megaphone, MessageSquare, Settings, LogOut, ChevronRight,
+  Star, Megaphone, MessageSquare, Settings, LogOut, ChevronRight, CalendarCheck,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { appointments } from "@/data/mockData";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/" },
+  { icon: CalendarCheck, label: "Appointments", href: "/appointments", badge: true },
   { icon: HardHat, label: "Workers", href: "/workers" },
   { icon: Users, label: "Users", href: "/users" },
   { icon: Grid3x3, label: "Categories", href: "/categories" },
@@ -20,6 +22,7 @@ const navItems = [
 export default function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [location, setLocation] = useLocation();
   const { logout, admin } = useAuth();
+  const pendingCount = appointments.filter((a) => a.status === "Pending").length;
 
   const handleNav = (href: string) => {
     setLocation(href);
@@ -52,8 +55,9 @@ export default function Sidebar({ open, onClose }: { open: boolean; onClose: () 
         <div className="px-3 py-3 flex-1 overflow-y-auto scrollbar-thin">
           <p className="text-white/30 text-[10px] font-semibold uppercase tracking-wider px-3 mb-2">Main Menu</p>
           <nav className="flex flex-col gap-0.5">
-            {navItems.map(({ icon: Icon, label, href }) => {
+            {navItems.map(({ icon: Icon, label, href, badge }) => {
               const active = location === href || (href !== "/" && location.startsWith(href));
+              const showBadge = badge && pendingCount > 0;
               return (
                 <button
                   key={href}
@@ -66,6 +70,11 @@ export default function Sidebar({ open, onClose }: { open: boolean; onClose: () 
                 >
                   <Icon size={16} className={active ? "text-white" : "text-white/50 group-hover:text-white"} />
                   <span className="flex-1">{label}</span>
+                  {showBadge && !active && (
+                    <span className="bg-amber-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
+                      {pendingCount}
+                    </span>
+                  )}
                   {active && <ChevronRight size={14} className="text-white/60" />}
                 </button>
               );

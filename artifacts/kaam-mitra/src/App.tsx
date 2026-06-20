@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import MobileFrame from "@/components/MobileFrame";
 import { SavedProvider } from "@/context/SavedContext";
+import { AppointmentsProvider } from "@/context/AppointmentsContext";
 import SplashPage from "@/pages/splash";
 import WelcomePage from "@/pages/welcome";
 import LoginPage from "@/pages/login";
@@ -12,6 +13,7 @@ import HomePage from "@/pages/home";
 import SearchPage from "@/pages/search";
 import CategoryPage from "@/pages/category";
 import WorkerDetailPage from "@/pages/worker";
+import BookAppointmentPage from "@/pages/book-appointment";
 import SavedPage from "@/pages/saved";
 import RequestsPage from "@/pages/requests";
 import RequestDetailPage from "@/pages/request-detail";
@@ -40,6 +42,7 @@ function Router() {
         <Route path="/search" component={SearchPage} />
         <Route path="/category/:slug" component={CategoryPage} />
         <Route path="/worker/:id" component={WorkerDetailPage} />
+        <Route path="/book/:id" component={BookAppointmentPage} />
         <Route path="/saved" component={SavedPage} />
         <Route path="/requests" component={RequestsPage} />
         <Route path="/requests/:id" component={RequestDetailPage} />
@@ -59,11 +62,13 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <SavedProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <Router />
-          </WouterRouter>
-        </SavedProvider>
+        <AppointmentsProvider>
+          <SavedProvider>
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+              <Router />
+            </WouterRouter>
+          </SavedProvider>
+        </AppointmentsProvider>
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>

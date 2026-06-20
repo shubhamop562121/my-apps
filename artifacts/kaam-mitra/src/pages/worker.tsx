@@ -1,8 +1,8 @@
 import { useLocation, useRoute } from "wouter";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft, MapPin, Star, BadgeCheck, Phone, MessageCircle,
-  Bookmark, Briefcase, Shield,
+  ArrowLeft, MapPin, Star, BadgeCheck,
+  Bookmark, Briefcase, Shield, CalendarDays,
 } from "lucide-react";
 import { workers } from "@/data/mockData";
 import { useSaved } from "@/context/SavedContext";
@@ -23,7 +23,7 @@ export default function WorkerDetailPage() {
 
   const saved = isSaved(worker.id);
   const initials = worker.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
-  const bgColors = ["bg-teal-100 text-teal-700", "bg-blue-100 text-blue-700", "bg-amber-100 text-amber-700", "bg-purple-100 text-purple-700", "bg-rose-100 text-rose-700"];
+  const bgColors = ["bg-orange-100 text-orange-700", "bg-blue-100 text-blue-700", "bg-amber-100 text-amber-700", "bg-purple-100 text-purple-700", "bg-rose-100 text-rose-700"];
   const colorClass = bgColors[worker.id.charCodeAt(1) % bgColors.length];
 
   return (
@@ -140,29 +140,28 @@ export default function WorkerDetailPage() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="mt-4 bg-white rounded-3xl shadow-sm border border-border p-5"
+          className="mt-4 bg-amber-50 border border-amber-200 rounded-3xl p-4 flex items-start gap-3"
         >
-          <h2 className="font-bold text-sm text-foreground mb-2">Contact</h2>
-          <p className="text-sm font-medium text-foreground">{worker.phone}</p>
+          <div className="w-8 h-8 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Shield size={16} className="text-amber-600" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-amber-800">Secure Booking</p>
+            <p className="text-xs text-amber-700 mt-0.5 leading-relaxed">
+              Book your appointment through KaamMitra. Our team will verify and assign the right worker for your job.
+            </p>
+          </div>
         </motion.div>
 
-        <div className="flex gap-3 mt-5 pb-8">
-          <a
-            href={`tel:${worker.phone}`}
-            className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground py-4 rounded-2xl font-semibold text-sm shadow-md"
-            data-testid="btn-call"
+        <div className="mt-5 pb-8">
+          <button
+            onClick={() => setLocation(`/book/${worker.id}`)}
+            className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-4 rounded-2xl font-bold text-sm shadow-md"
+            data-testid="btn-book"
           >
-            <Phone size={18} />
-            Call Now
-          </a>
-          <a
-            href={`https://wa.me/${worker.phone.replace(/\D/g, "")}`}
-            className="flex-1 flex items-center justify-center gap-2 bg-green-500 text-white py-4 rounded-2xl font-semibold text-sm shadow-md"
-            data-testid="btn-whatsapp"
-          >
-            <MessageCircle size={18} />
-            WhatsApp
-          </a>
+            <CalendarDays size={18} />
+            Book Appointment
+          </button>
         </div>
       </div>
     </div>
