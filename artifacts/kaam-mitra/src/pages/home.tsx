@@ -62,7 +62,7 @@ export default function HomePage() {
               className="flex flex-col items-center gap-1.5 cursor-pointer"
               data-testid={`cat-${cat.slug}`}
             >
-              <div className="w-14 h-14 rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center">
+              <div className="shadow-sm border border-border/40 rounded-2xl overflow-hidden">
                 <CategoryIcon slug={cat.slug} size={26} />
               </div>
               <span className="text-[10px] font-medium text-muted-foreground text-center leading-tight">{cat.label}</span>
