@@ -82,12 +82,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setOtpSent(true);
       console.log("OTP sent successfully");
     } catch (err) {
-      console.error(
-        "signInWithPhoneNumber failed →",
-        "code:", (err as { code?: string })?.code,
-        "| connected projectId:", auth.app.options.projectId,
-        err,
-      );
+      const e = err as { code?: string; message?: string };
+      console.error(e.code);
+      console.error(e.message);
       resetRecaptcha();
       setOtpSent(false);
       confirmationRef.current = null;
