@@ -10,6 +10,7 @@ import { auth } from "@/lib/firebase";
 type AuthContextValue = {
   user: User | null;
   loading: boolean;
+  otpSent: boolean;
   sendOTP: (phoneNumber: string) => Promise<void>;
   verifyOTP: (otp: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -46,6 +47,7 @@ export function authErrorMessage(err: unknown): string {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [otpSent, setOtpSent] = useState(false);
   const confirmationRef = useRef<ConfirmationResult | null>(null);
   const recaptchaRef = useRef<RecaptchaVerifier | null>(null);
 
@@ -77,29 +79,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const verifier = getRecaptcha();
     try {
       confirmationRef.current = await signInWithPhoneNumber(auth, phoneNumber, verifier);
+      setOtpSent(true);
+      console.log("OTP sent successfully");
     } catch (err) {
       resetRecaptcha();
+      setOtpSent(false);
+      confirmationRef.current = null;
       throw err;
     }
   };
 
   const verifyOTP = async (otp: string) => {
+    console.log("OTP verification started");
+    // Hard guard: login is impossible unless Send OTP succeeded and Firebase
+    // returned a confirmationResult to confirm against.
     if (!confirmationRef.current) {
+      console.log("Firebase verification failed");
       throw Object.assign(new Error("No verification in progress."), {
         code: "auth/no-confirmation",
       });
     }
-    await confirmationRef.current.confirm(otp);
-    confirmationRef.current = null;
-    resetRecaptcha();
+    try {
+      await confirmationRef.current.confirm(otp);
+      console.log("Firebase verification success");
+      confirmationRef.current = null;
+      setOtpSent(false);
+      resetRecaptcha();
+    } catch (err) {
+      console.log("Firebase verification failed");
+      throw err;
+    }
   };
 
   const logout = async () => {
+    confirmationRef.current = null;
+    setOtpSent(false);
+    resetRecaptcha();
     await signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, sendOTP, verifyOTP, logout }}>
+    <AuthContext.Provider value={{ user, loading, otpSent, sendOTP, verifyOTP, logout }}>
       {children}
       <div id="recaptcha-container" />
     </AuthContext.Provider>

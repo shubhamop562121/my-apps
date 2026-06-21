@@ -18,6 +18,7 @@ Real SMS delivery is blocked until the project owner does these in the Firebase 
 ## "Any OTP works" is usually NOT an OTP bug
 `confirmationResult.confirm(otp)` is server-validated by Firebase and rejects wrong codes — the crypto is fine. A reported "any OTP logs in / bypass login" almost always means **protected routes aren't gated on auth state**: anyone navigating by URL (or a guest "Explore without account" button linking straight to /home) enters the app without ever verifying. Fix = a route guard (`AuthGate`) that checks `onAuthStateChanged` user before rendering protected pages, plus removing guest-bypass entry points.
 - Guard race: after a correct `confirm(otp)`, navigating to the protected page can evaluate before the `user` React state propagates → false redirect to /welcome. Fall back to `auth.currentUser` (set synchronously once confirm resolves) in the guard to avoid the flash.
+- **Persisted-session illusion:** once `browserLocalPersistence` is set, a user who logged in once stays signed in across refreshes. Re-"testing the bypass" then lands them straight into the app no matter what OTP they type — it *looks* like a bypass but is just the prior valid session. Always retest after logout / in incognito before trusting a bypass report.
 - **Client route guards are NOT an authorization boundary** — Firestore Security Rules must also require auth, or data is exposed regardless of client gating.
 
 ## Code gotchas

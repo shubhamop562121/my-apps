@@ -7,7 +7,7 @@ import { useAuth, authErrorMessage } from "@/context/AuthContext";
 
 export default function OtpPage() {
   const [, setLocation] = useLocation();
-  const { sendOTP, verifyOTP } = useAuth();
+  const { sendOTP, verifyOTP, otpSent } = useAuth();
   const [otp, setOtp] = useState("");
   const [countdown, setCountdown] = useState(30);
   const [loading, setLoading] = useState(false);
@@ -23,7 +23,12 @@ export default function OtpPage() {
   }, [countdown]);
 
   const handleVerify = async () => {
-    if (otp.length < 6 || loading) return;
+    if (loading) return;
+    if (!otpSent) {
+      setError("Please tap “Send OTP” first to receive a code.");
+      return;
+    }
+    if (otp.length < 6) return;
     setLoading(true);
     setError("");
     try {
@@ -80,6 +85,15 @@ export default function OtpPage() {
           </p>
         </div>
 
+        {!otpSent && (
+          <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6">
+            <AlertCircle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-amber-700">
+              No code has been sent yet. Please request an OTP from the login screen first.
+            </p>
+          </div>
+        )}
+
         <div className="flex flex-col items-center gap-6 mb-8">
           <InputOTP
             maxLength={6}
@@ -129,7 +143,7 @@ export default function OtpPage() {
 
         <button
           onClick={handleVerify}
-          disabled={otp.length < 6 || loading}
+          disabled={!otpSent || otp.length < 6 || loading}
           className="w-full bg-primary text-primary-foreground py-4 rounded-2xl font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-all flex items-center justify-center gap-2"
           data-testid="btn-verify"
         >
