@@ -10,10 +10,9 @@ export default function OtpPage() {
   const [countdown, setCountdown] = useState(30);
 
   useEffect(() => {
-    if (countdown > 0) {
-      const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
-      return () => clearTimeout(t);
-    }
+    if (countdown <= 0) return;
+    const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
   }, [countdown]);
 
   const handleVerify = () => {

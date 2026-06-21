@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useLocation, useRoute } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowLeft, CalendarDays, Clock, MapPin, User, Phone, FileText, CheckCircle2 } from "lucide-react";
-import { workers } from "@/data/mockData";
+import { ArrowLeft, CalendarDays, Clock, MapPin, User, Phone, FileText, CheckCircle2, Loader2 } from "lucide-react";
+import { useWorkers } from "@/hooks/useWorkers";
 import { useAppointments } from "@/context/AppointmentsContext";
 
 const timeSlots = ["8:00 AM","9:00 AM","10:00 AM","11:00 AM","12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM","6:00 PM"];
@@ -11,6 +11,7 @@ export default function BookAppointmentPage() {
   const [, setLocation] = useLocation();
   const [, params] = useRoute("/book/:id");
   const { addAppointment } = useAppointments();
+  const { workers, loading } = useWorkers();
 
   const worker = workers.find((w) => w.id === params?.id);
 
@@ -26,6 +27,15 @@ export default function BookAppointmentPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [appointmentId, setAppointmentId] = useState("");
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen gap-2 text-muted-foreground">
+        <Loader2 size={20} className="animate-spin" />
+        <span className="text-sm">Loading worker profile…</span>
+      </div>
+    );
+  }
 
   if (!worker) {
     return (

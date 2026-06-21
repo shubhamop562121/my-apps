@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, ReactNode } from "react";
-import { savedWorkerIds } from "@/data/mockData";
 
 type SavedContextType = {
   savedIds: Set<string>;
@@ -10,7 +9,7 @@ type SavedContextType = {
 const SavedContext = createContext<SavedContextType | null>(null);
 
 export function SavedProvider({ children }: { children: ReactNode }) {
-  const [savedIds, setSavedIds] = useState<Set<string>>(new Set(savedWorkerIds));
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
 
   const toggleSave = (id: string) => {
     setSavedIds((prev) => {

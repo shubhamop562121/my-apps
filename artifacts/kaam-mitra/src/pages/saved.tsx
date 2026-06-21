@@ -4,12 +4,13 @@ import { ArrowLeft, Bookmark } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import WorkerCard from "@/components/WorkerCard";
 import EmptyState from "@/components/EmptyState";
-import { workers } from "@/data/mockData";
 import { useSaved } from "@/context/SavedContext";
+import { useWorkers } from "@/hooks/useWorkers";
 
 export default function SavedPage() {
   const [, setLocation] = useLocation();
   const { savedIds, toggleSave } = useSaved();
+  const { workers } = useWorkers();
 
   const savedWorkers = workers.filter((w) => savedIds.has(w.id));
 

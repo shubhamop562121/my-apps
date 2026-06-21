@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Search, CheckCircle2, XCircle, UserCheck, Play, Trophy } from "lucide-react";
 import Layout from "@/components/Layout";
 import Badge from "@/components/Badge";
-import { appointments as initialApts, workers, Appointment } from "@/data/mockData";
+import { appointments as initialApts, Appointment } from "@/data/mockData";
+import { useWorkers } from "@/hooks/useWorkers";
 
 type BadgeVariant = "success" | "danger" | "warning" | "info" | "neutral";
 
@@ -22,6 +23,7 @@ const categoryIcons: Record<string, string> = {
 };
 
 export default function AppointmentsPage() {
+  const { workers } = useWorkers();
   const [apts, setApts] = useState<Appointment[]>(initialApts);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");

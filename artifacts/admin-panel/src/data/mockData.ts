@@ -49,19 +49,6 @@ export type Appointment = {
   note?: string;
 };
 
-export const workers: Worker[] = [
-  { id: "w1", name: "Ramesh Kumar", phone: "+91 98765 43210", category: "Plumber", city: "New Delhi", experience: 8, rating: 4.8, reviewCount: 124, status: "active", verified: true, joinedAt: "2024-01-10", description: "Expert plumber with 8 years experience." },
-  { id: "w2", name: "Suresh Sharma", phone: "+91 87654 32109", category: "Electrician", city: "Mumbai", experience: 6, rating: 4.6, reviewCount: 98, status: "active", verified: true, joinedAt: "2024-01-15", description: "Certified electrician." },
-  { id: "w3", name: "Dinesh Patel", phone: "+91 76543 21098", category: "AC Repair", city: "Ahmedabad", experience: 5, rating: 4.5, reviewCount: 76, status: "active", verified: false, joinedAt: "2024-02-01", description: "AC repair specialist." },
-  { id: "w4", name: "Mahesh Yadav", phone: "+91 65432 10987", category: "Carpenter", city: "Lucknow", experience: 10, rating: 4.9, reviewCount: 203, status: "active", verified: true, joinedAt: "2023-11-05", description: "Expert carpenter." },
-  { id: "w5", name: "Ravi Gupta", phone: "+91 54321 09876", category: "Painter", city: "Jaipur", experience: 4, rating: 4.3, reviewCount: 55, status: "inactive", verified: false, joinedAt: "2024-03-10", description: "Interior/exterior painter." },
-  { id: "w6", name: "Ajay Singh", phone: "+91 43210 98765", category: "Mason", city: "Chandigarh", experience: 12, rating: 4.7, reviewCount: 167, status: "active", verified: true, joinedAt: "2023-09-20", description: "Skilled mason." },
-  { id: "w7", name: "Vikram Nair", phone: "+91 32109 87654", category: "Welder", city: "Bangalore", experience: 7, rating: 4.4, reviewCount: 89, status: "active", verified: true, joinedAt: "2024-01-25", description: "Expert welder." },
-  { id: "w8", name: "Praveen Das", phone: "+91 21098 76543", category: "CCTV", city: "Hyderabad", experience: 5, rating: 4.6, reviewCount: 112, status: "active", verified: true, joinedAt: "2024-02-14", description: "CCTV installation expert." },
-  { id: "w9", name: "Santosh Mishra", phone: "+91 10987 65432", category: "RO Repair", city: "Bhopal", experience: 3, rating: 4.2, reviewCount: 43, status: "inactive", verified: false, joinedAt: "2024-04-01", description: "RO water purifier technician." },
-  { id: "w10", name: "Harish Tiwari", phone: "+91 98760 12345", category: "Cleaning", city: "Pune", experience: 6, rating: 4.5, reviewCount: 78, status: "active", verified: true, joinedAt: "2024-01-30", description: "Deep cleaning specialist." },
-];
-
 export const users: User[] = [
   { id: "u1", name: "Rahul Sharma", phone: "+91 98765 43210", city: "New Delhi", status: "active", registeredAt: "2024-01-05", totalRequests: 5 },
   { id: "u2", name: "Priya Verma", phone: "+91 87654 32109", city: "Mumbai", status: "active", registeredAt: "2024-01-12", totalRequests: 3 },
@@ -136,7 +123,6 @@ export const appointments: Appointment[] = [
 
 export const dashboardStats = {
   totalUsers: 8,
-  totalWorkers: 10,
   totalCategories: 11,
   totalCities: 10,
   totalReviews: 7,
@@ -148,14 +134,4 @@ export const dashboardStats = {
     { month: "Mar", users: 3, workers: 2 },
     { month: "Apr", users: 1, workers: 3 },
   ],
-  workersByCategory: [
-    { category: "Labour", count: 67 },
-    { category: "Electrician", count: 52 },
-    { category: "Plumber", count: 45 },
-    { category: "Cleaning", count: 40 },
-    { category: "Carpenter", count: 38 },
-    { category: "Others", count: 84 },
-  ],
-  recentWorkers: workers.slice(0, 5),
-  recentUsers: users.slice(0, 5),
 };

@@ -65,7 +65,7 @@ export default function Dashboard() {
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie
-                  data={workersByCategory.length > 0 ? workersByCategory : dashboardStats.workersByCategory}
+                  data={workersByCategory}
                   dataKey="count"
                   nameKey="category"
                   cx="50%"
@@ -73,7 +73,7 @@ export default function Dashboard() {
                   outerRadius={75}
                   innerRadius={40}
                 >
-                  {(workersByCategory.length > 0 ? workersByCategory : dashboardStats.workersByCategory).map((_, i) => (
+                  {workersByCategory.map((_, i) => (
                     <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                   ))}
                 </Pie>

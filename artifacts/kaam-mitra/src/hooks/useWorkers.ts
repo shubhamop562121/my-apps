@@ -14,7 +14,7 @@ export function useWorkers() {
       q,
       (snap) => {
         const data: Worker[] = snap.docs.map((d) => {
-          const raw = d.data() as Omit<Worker, "id">;
+          const raw = d.data() as Omit<Worker, "id"> & { description?: string };
           return {
             id: d.id,
             name: raw.name ?? "",
