@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Save, Globe, Bell, Shield, Database, Phone, Mail, CheckCircle2, KeyRound, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import Layout from "@/components/Layout";
-import { getAdminCreds, saveAdminCreds } from "@/context/AuthContext";
 import { useAuth } from "@/context/AuthContext";
+import { auth } from "@/lib/firebase";
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
 
 const STORAGE_KEY = "km_contact_settings";
 
@@ -15,12 +16,12 @@ function loadContactSettings() {
 }
 
 export default function SettingsPage() {
-  const { logout } = useAuth();
+  const { logout, admin } = useAuth();
   const initial = loadContactSettings();
-  const currentCreds = getAdminCreds();
 
   const [saved, setSaved] = useState(false);
   const [credSaved, setCredSaved] = useState(false);
+  const [credSaving, setCredSaving] = useState(false);
   const [credError, setCredError] = useState("");
 
   const [appName, setAppName] = useState("KaamMitra");
@@ -35,7 +36,6 @@ export default function SettingsPage() {
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [workerApproval, setWorkerApproval] = useState(true);
 
-  const [newEmail, setNewEmail] = useState(currentCreds.email);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -51,36 +51,61 @@ export default function SettingsPage() {
     setTimeout(() => setSaved(false), 2500);
   };
 
-  const handleCredSave = () => {
+  const handleCredSave = async () => {
     setCredError("");
-    const creds = getAdminCreds();
 
-    if (currentPassword !== creds.password) {
-      setCredError("Current password is incorrect.");
+    const user = auth.currentUser;
+    if (!user || !user.email) {
+      setCredError("Your session has expired. Please sign in again.");
       return;
     }
-    if (!newEmail.trim() || !/\S+@\S+\.\S+/.test(newEmail)) {
-      setCredError("Enter a valid email address.");
+    if (!currentPassword) {
+      setCredError("Enter your current password to confirm.");
       return;
     }
-    if (newPassword && newPassword.length < 6) {
+    if (!newPassword || newPassword.length < 6) {
       setCredError("New password must be at least 6 characters.");
       return;
     }
-    if (newPassword && newPassword !== confirmPassword) {
+    if (newPassword !== confirmPassword) {
       setCredError("New passwords do not match.");
       return;
     }
 
-    saveAdminCreds(newEmail, newPassword || creds.password);
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setCredSaved(true);
-    setTimeout(() => {
-      setCredSaved(false);
-      logout();
-    }, 1500);
+    setCredSaving(true);
+    try {
+      // Re-authenticate with the current password before a sensitive change.
+      console.log("[AdminAuth] re-authenticating before password change");
+      const cred = EmailAuthProvider.credential(user.email, currentPassword);
+      await reauthenticateWithCredential(user, cred);
+
+      console.log("[AdminAuth] updating password");
+      await updatePassword(user, newPassword);
+      console.log("[AdminAuth] password updated successfully");
+
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setCredSaved(true);
+      setTimeout(() => {
+        setCredSaved(false);
+        logout();
+      }, 1500);
+    } catch (err) {
+      console.error("[AdminAuth] password change failed:", err);
+      const code = (err as { code?: string })?.code ?? "";
+      if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
+        setCredError("Current password is incorrect.");
+      } else if (code === "auth/weak-password") {
+        setCredError("New password is too weak. Use at least 6 characters.");
+      } else if (code === "auth/requires-recent-login") {
+        setCredError("Please sign out and sign in again, then retry.");
+      } else {
+        setCredError("Could not update password. Please try again.");
+      }
+    } finally {
+      setCredSaving(false);
+    }
   };
 
   const ToggleRow = ({ label, value, onChange, desc }: { label: string; value: boolean; onChange: (v: boolean) => void; desc?: string }) => (
@@ -138,18 +163,22 @@ export default function SettingsPage() {
 
         <Section icon={KeyRound} title="Admin Login Credentials">
           <p className="text-xs text-muted-foreground mb-4">
-            Change the email and password used to log in to this admin panel. You'll be logged out after saving.
+            Change the password used to log in to this admin panel. You'll be logged out after saving so you can sign in with the new password.
           </p>
           <div className="grid grid-cols-1 gap-4">
             <div>
               <label className="text-xs font-semibold mb-1.5 block">Login Email</label>
               <input
                 type="email"
-                className={inputCls}
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                placeholder="admin@kaammitra.in"
+                className={inputCls + " opacity-70 cursor-not-allowed"}
+                value={admin?.email ?? ""}
+                readOnly
+                disabled
               />
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Managed in Firebase Authentication. To add or remove admins, update the
+                <span className="font-medium"> admins</span> collection in Firestore.
+              </p>
             </div>
             <PasswordField
               label="Current Password (required to confirm)"
@@ -159,7 +188,7 @@ export default function SettingsPage() {
               onToggle={() => setShowCurrent(!showCurrent)}
             />
             <div className="border-t border-border pt-4">
-              <p className="text-xs text-muted-foreground mb-3">Leave the new password fields blank to keep your current password.</p>
+              <p className="text-xs text-muted-foreground mb-3">Enter a new password (at least 6 characters) and confirm it.</p>
               <div className="grid grid-cols-1 gap-3">
                 <PasswordField
                   label="New Password"
@@ -195,9 +224,10 @@ export default function SettingsPage() {
 
             <button
               onClick={handleCredSave}
-              className="flex items-center justify-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary/90 transition"
+              disabled={credSaving}
+              className="flex items-center justify-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-60"
             >
-              <KeyRound size={14} /> Update Login Credentials
+              <KeyRound size={14} /> {credSaving ? "Updating…" : "Update Password"}
             </button>
           </div>
         </Section>

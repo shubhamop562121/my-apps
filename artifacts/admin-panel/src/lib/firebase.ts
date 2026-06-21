@@ -1,5 +1,6 @@
 import { initializeApp, getApps } from "firebase/app";
 import { getFirestore, enableNetwork } from "firebase/firestore";
+import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -12,6 +13,12 @@ const firebaseConfig = {
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 export const db = getFirestore(app);
+export const auth = getAuth(app);
+
+// Keep the admin signed in across refreshes and browser restarts.
+setPersistence(auth, browserLocalPersistence).catch(() => {
+  console.warn("Auth: could not set local persistence — using default.");
+});
 
 enableNetwork(db).catch(() => {
   console.warn("Firestore: could not enable network — will use cache.");

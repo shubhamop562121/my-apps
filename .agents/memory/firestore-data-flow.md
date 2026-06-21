@@ -41,6 +41,30 @@ collection (each only if empty). Dashboard counts read live from these collectio
 later update/delete target the wrong/nonexistent doc. (Per-field-mapped hooks like
 `useWorkers` are safe because `id: d.id` is a discrete property, not part of a spread.)
 
-**Open risk:** Firestore security rules are still open/permissive. Admin panel is NOT
-Firebase-authenticated, yet reads PII (phone/address). Locking rules down will require giving
-admin a Firebase-auth path or it will break admin reads/writes.
+**Admin authentication (real):** admin panel uses Firebase email/password auth + an
+allowlist. An account is admin only if a doc exists in the `admins` collection keyed by the
+**lowercased email** (`admins/{email}`). Bootstrap is manual: create the Auth user in the
+Firebase console AND add the `admins/{email}` doc (security rules forbid client writes to
+`admins`). The old hardcoded `admin@kaammitra.in / admin123` login was removed.
+`AuthContext` gates on `onAuthStateChanged` + an async allowlist check, so it exposes a
+`loading` flag the router MUST honor (otherwise refresh flashes the login page before auth
+resolves). Settings page changes password via reauthenticate + `updatePassword` (email is
+read-only because it's the allowlist key).
+
+**Security rules:** live in repo-root `firestore.rules` (NOT auto-deployed — paste in console
+or `firebase deploy --only firestore:rules`). Model: catalog (workers/categories/cities/
+advertisements) public-read+admin-write; appointments create-if-signed-in with
+`userId==auth.uid`, read own or admin; users own-doc or admin; messages create-public +
+admin-read; `isAdmin()` checks `exists(admins/$(email.lower()))`. Rules match the app's real
+query shapes (kaam-mitra only writes appointments tagged with userId, reads workers).
+
+**Capacitor mobile build:** kaam-mitra wraps as Android via Capacitor (`capacitor.config.ts`,
+appId `in.kaammitra.app`, webDir `dist/public`). Gotcha: `vite.config.ts` throws unless PORT
+AND BASE_PATH are set even for `build`, so the `build:mobile` script sets them inline
+(`BASE_PATH=/ PORT=3000`) — base must be `/` for the WebView. APK/AAB build + signing CANNOT
+run in Replit (no Android SDK); see `KaamMitra-Deployment-Guide.md`. Phone/OTP auth uses
+reCAPTCHA which fails in Android WebView — needs `@capacitor-firebase/authentication` native
+plugin or SHA fingerprints for production.
+
+**Open risk:** Security rules in `firestore.rules` are written but only take effect once the
+user deploys them in their Firebase project; until then the DB is still open/permissive.

@@ -1,54 +1,98 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+} from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
 
-type Admin = { email: string; name: string };
+type Admin = { uid: string; email: string; name: string };
 
 type AuthContextType = {
   admin: Admin | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 };
-
-const CREDS_KEY = "km_admin_creds";
-const DEFAULT_EMAIL = "admin@kaammitra.in";
-const DEFAULT_PASSWORD = "admin123";
-
-export function getAdminCreds(): { email: string; password: string } {
-  try {
-    const raw = localStorage.getItem(CREDS_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  return { email: DEFAULT_EMAIL, password: DEFAULT_PASSWORD };
-}
-
-export function saveAdminCreds(email: string, password: string) {
-  localStorage.setItem(CREDS_KEY, JSON.stringify({ email, password }));
-}
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+/**
+ * An account is an admin only if a document keyed by its (lowercased) email
+ * exists in the `admins` collection. This collection is managed manually in the
+ * Firebase console / locked by security rules, so it is the single source of
+ * truth for who may access the admin panel.
+ */
+async function isAuthorizedAdmin(email: string): Promise<boolean> {
+  const key = email.trim().toLowerCase();
+  console.log("[AdminAuth] checking admin allowlist for:", key);
+  const snap = await getDoc(doc(db, "admins", key));
+  console.log("[AdminAuth] admin allowlist match:", snap.exists());
+  return snap.exists();
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [admin, setAdmin] = useState<Admin | null>(() => {
-    const stored = sessionStorage.getItem("km_admin");
-    return stored ? JSON.parse(stored) : null;
-  });
+  const [admin, setAdmin] = useState<Admin | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    const creds = getAdminCreds();
-    if (email === creds.email && password === creds.password) {
-      const user = { email, name: "Admin" };
-      setAdmin(user);
-      sessionStorage.setItem("km_admin", JSON.stringify(user));
-      return true;
+  // React to Firebase auth state so refreshes keep the admin signed in
+  // (and so a revoked/non-admin account is rejected immediately).
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (!user || !user.email) {
+        setAdmin(null);
+        setLoading(false);
+        return;
+      }
+      try {
+        const ok = await isAuthorizedAdmin(user.email);
+        if (ok) {
+          setAdmin({
+            uid: user.uid,
+            email: user.email,
+            name: user.displayName || "Admin",
+          });
+        } else {
+          console.warn("[AdminAuth] signed-in account is not an admin — signing out");
+          await signOut(auth);
+          setAdmin(null);
+        }
+      } catch (err) {
+        console.error("[AdminAuth] admin verification failed:", err);
+        await signOut(auth);
+        setAdmin(null);
+      } finally {
+        setLoading(false);
+      }
+    });
+    return unsub;
+  }, []);
+
+  const login = async (email: string, password: string): Promise<void> => {
+    console.log("[AdminAuth] login attempt:", email);
+    const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
+    const ok = await isAuthorizedAdmin(cred.user.email ?? email);
+    if (!ok) {
+      await signOut(auth);
+      console.warn("[AdminAuth] login rejected — not on admin allowlist:", email);
+      throw new Error("not-admin");
     }
-    return false;
+    console.log("[AdminAuth] login success:", email);
+    // onAuthStateChanged sets the admin state.
   };
 
-  const logout = () => {
+  const logout = async () => {
+    console.log("[AdminAuth] logging out");
+    await signOut(auth);
     setAdmin(null);
-    sessionStorage.removeItem("km_admin");
   };
 
-  return <AuthContext.Provider value={{ admin, login, logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ admin, loading, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

@@ -1,0 +1,71 @@
+rules_version = '2';
+
+// KaamMitra Firestore security rules.
+//
+// Model:
+//   - Regular app users sign in with Firebase Phone Auth (kaam-mitra app).
+//   - Admins are accounts whose (lowercased) email has a document in `admins`.
+//     The `admins` collection is the allowlist and is managed manually in the
+//     Firebase console — it cannot be written from any client.
+//
+// Deploy: Firebase console → Firestore Database → Rules → paste → Publish.
+// Or with the CLI: `firebase deploy --only firestore:rules`.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.email != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.token.email.lower()));
+    }
+
+    // Admin allowlist. Readable by signed-in users (so the admin panel can
+    // verify itself), but never writable from a client — manage in the console.
+    match /admins/{email} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // Public catalog data: anyone can read; only admins can modify.
+    match /workers/{id}        { allow read: if true; allow write: if isAdmin(); }
+    match /categories/{id}     { allow read: if true; allow write: if isAdmin(); }
+    match /cities/{id}         { allow read: if true; allow write: if isAdmin(); }
+    match /advertisements/{id} { allow read: if true; allow write: if isAdmin(); }
+
+    // Reviews: public read; admins manage. (App can be extended to let signed-in
+    // users create their own reviews by adding an `allow create` rule.)
+    match /reviews/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // User profiles: a user may read/write their own doc (id == uid); admins read all.
+    match /users/{id} {
+      allow read:   if isAdmin() || (isSignedIn() && request.auth.uid == id);
+      allow create, update: if isAdmin() || (isSignedIn() && request.auth.uid == id);
+      allow delete: if isAdmin();
+    }
+
+    // Appointments: a signed-in user creates appointments tagged with their uid
+    // and can read their own; admins read and manage everything.
+    match /appointments/{id} {
+      allow read:   if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Messages (e.g. contact/support submissions): anyone can submit;
+    // only admins can read or manage them.
+    match /messages/{id} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Everything else is denied by default.
+  }
+}

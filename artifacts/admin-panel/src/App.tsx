@@ -18,8 +18,21 @@ const queryClient = new QueryClient();
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 function AppRoutes() {
-  const { admin } = useAuth();
+  const { admin, loading } = useAuth();
   const [location] = useLocation();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow">
+            <span className="text-white text-sm font-bold">KM</span>
+          </div>
+          <div className="h-5 w-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   if (!admin && location !== "/login") {
     return <Redirect to="/login" />;
