@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { Plus, Edit2, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+import { Plus, Edit2, Trash2, ToggleLeft, ToggleRight, Loader2 } from "lucide-react";
 import Layout from "@/components/Layout";
 import Badge from "@/components/Badge";
-import { ads as initialAds, Ad } from "@/data/mockData";
+import { Ad } from "@/data/mockData";
+import { useCollection } from "@/hooks/useCollection";
 
 export default function AdsPage() {
-  const [ads, setAds] = useState(initialAds);
+  const { items: ads, loading, error, add, update, remove } = useCollection<Ad>("advertisements");
   const [showModal, setShowModal] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState<Ad | null>(null);
   const [form, setForm] = useState({ title:"",imageUrl:"",linkUrl:"",position:"Home Top",status:"active" as "active"|"inactive",startDate:"",endDate:"" });
 
@@ -14,16 +16,25 @@ export default function AdsPage() {
 
   const openAdd = () => { setEditing(null); setForm({ title:"",imageUrl:"",linkUrl:"",position:"Home Top",status:"active",startDate:"",endDate:"" }); setShowModal(true); };
   const openEdit = (a: Ad) => { setEditing(a); setForm({ title:a.title,imageUrl:a.imageUrl,linkUrl:a.linkUrl,position:a.position,status:a.status,startDate:a.startDate,endDate:a.endDate }); setShowModal(true); };
-  const handleDelete = (id: string) => { if (confirm("Delete ad?")) setAds((prev) => prev.filter((a) => a.id !== id)); };
-  const toggleStatus = (id: string) => setAds((prev) => prev.map((a) => a.id === id ? { ...a, status: a.status === "active" ? "inactive" : "active" } as Ad : a));
-  const handleSave = () => {
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete ad?")) return;
+    try { await remove(id); } catch (err) { alert(`Failed to delete ad: ${(err as Error).message}`); }
+  };
+  const toggleStatus = async (a: Ad) => {
+    try { await update(a.id, { status: a.status === "active" ? "inactive" : "active" }); } catch (err) { alert(`Failed to update ad: ${(err as Error).message}`); }
+  };
+  const handleSave = async () => {
     if (!form.title) return;
-    if (editing) {
-      setAds((prev) => prev.map((a) => a.id === editing.id ? { ...a, ...form } : a));
-    } else {
-      setAds((prev) => [{ id: `a${Date.now()}`, ...form }, ...prev]);
+    setSaving(true);
+    try {
+      if (editing) await update(editing.id, form);
+      else await add({ ...form });
+      setShowModal(false);
+    } catch (err) {
+      alert(`Failed to save ad: ${(err as Error).message}`);
+    } finally {
+      setSaving(false);
     }
-    setShowModal(false);
   };
 
   return (
@@ -35,6 +46,10 @@ export default function AdsPage() {
             <Plus size={15} /> Add Ad
           </button>
         </div>
+
+        {loading && <div className="flex items-center gap-2 text-muted-foreground text-sm py-8 justify-center"><Loader2 size={16} className="animate-spin" />Loading ads…</div>}
+        {error && !loading && <div className="text-center text-red-500 py-8 text-sm bg-card border border-border rounded-xl">Failed to load ads: {error}</div>}
+        {!loading && !error && ads.length === 0 && <div className="text-center text-muted-foreground py-8 text-sm bg-card border border-border rounded-xl">No ads yet. Click "Add Ad" to create one.</div>}
 
         <div className="flex flex-col gap-4">
           {ads.map((a) => (
@@ -52,7 +67,7 @@ export default function AdsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <button onClick={() => toggleStatus(a.id)} className={`p-1.5 rounded-lg transition ${a.status === "active" ? "hover:bg-green-50 text-green-600" : "hover:bg-gray-100 text-gray-500"}`}>
+                  <button onClick={() => toggleStatus(a)} className={`p-1.5 rounded-lg transition ${a.status === "active" ? "hover:bg-green-50 text-green-600" : "hover:bg-gray-100 text-gray-500"}`}>
                     {a.status === "active" ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
                   </button>
                   <button onClick={() => openEdit(a)} className="p-1.5 rounded-lg hover:bg-blue-50 text-blue-600 transition"><Edit2 size={14} /></button>
@@ -83,8 +98,8 @@ export default function AdsPage() {
               </div>
             </div>
             <div className="flex gap-3 px-6 pb-6">
-              <button onClick={() => setShowModal(false)} className="flex-1 border border-border py-2.5 rounded-xl text-sm hover:bg-muted transition">Cancel</button>
-              <button onClick={handleSave} className="flex-1 bg-primary text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-primary/90 transition">Save</button>
+              <button onClick={() => setShowModal(false)} disabled={saving} className="flex-1 border border-border py-2.5 rounded-xl text-sm hover:bg-muted transition disabled:opacity-50">Cancel</button>
+              <button onClick={handleSave} disabled={saving} className="flex-1 flex items-center justify-center gap-2 bg-primary text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50">{saving && <Loader2 size={14} className="animate-spin" />}Save</button>
             </div>
           </div>
         </div>

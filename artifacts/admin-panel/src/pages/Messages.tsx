@@ -1,14 +1,17 @@
 import { useState } from "react";
-import { Search, CheckCircle2, Trash2, MessageSquare } from "lucide-react";
+import { Search, CheckCircle2, Trash2, MessageSquare, Loader2 } from "lucide-react";
 import Layout from "@/components/Layout";
 import Badge from "@/components/Badge";
-import { messages as initialMessages, Message } from "@/data/mockData";
+import { Message } from "@/data/mockData";
+import { useCollection } from "@/hooks/useCollection";
 
 export default function MessagesPage() {
-  const [messages, setMessages] = useState(initialMessages);
+  const { items: messages, loading, error, update, remove } = useCollection<Message>("messages");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
-  const [selected, setSelected] = useState<Message | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const selected = messages.find((m) => m.id === selectedId) ?? null;
 
   const filtered = messages.filter((m) => {
     const matchSearch = m.name.toLowerCase().includes(search.toLowerCase()) || m.subject.toLowerCase().includes(search.toLowerCase());
@@ -16,14 +19,16 @@ export default function MessagesPage() {
     return matchSearch && matchFilter;
   });
 
-  const markResolved = (id: string) => {
-    setMessages((prev) => prev.map((m) => m.id === id ? { ...m, status: "resolved" } as Message : m));
-    if (selected?.id === id) setSelected((s) => s ? { ...s, status: "resolved" } : null);
+  const markResolved = async (id: string) => {
+    try { await update(id, { status: "resolved" }); } catch (err) { alert(`Failed to update message: ${(err as Error).message}`); }
   };
-  const handleDelete = (id: string) => {
-    if (confirm("Delete message?")) {
-      setMessages((prev) => prev.filter((m) => m.id !== id));
-      if (selected?.id === id) setSelected(null);
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete message?")) return;
+    try {
+      await remove(id);
+      if (selectedId === id) setSelectedId(null);
+    } catch (err) {
+      alert(`Failed to delete message: ${(err as Error).message}`);
     }
   };
 
@@ -47,10 +52,12 @@ export default function MessagesPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
+            {loading && <div className="flex items-center gap-2 text-muted-foreground text-sm py-8 justify-center"><Loader2 size={16} className="animate-spin" />Loading messages…</div>}
+            {error && !loading && <div className="text-center text-red-500 py-8 text-sm bg-card border border-border rounded-xl">Failed to load messages: {error}</div>}
             {filtered.map((m) => (
               <button
                 key={m.id}
-                onClick={() => setSelected(m)}
+                onClick={() => setSelectedId(m.id)}
                 className={`w-full text-left bg-card border rounded-xl p-4 transition shadow-sm ${selected?.id === m.id ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/40"}`}
               >
                 <div className="flex items-center justify-between gap-2">

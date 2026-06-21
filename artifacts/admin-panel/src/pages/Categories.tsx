@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import { Plus, Edit2, Trash2, Loader2 } from "lucide-react";
 import Layout from "@/components/Layout";
 import Badge from "@/components/Badge";
-import { categories as initialCats, Category } from "@/data/mockData";
+import { Category } from "@/data/mockData";
+import { useCollection } from "@/hooks/useCollection";
 
 export default function CategoriesPage() {
-  const [cats, setCats] = useState(initialCats);
+  const { items: cats, loading, error, add, update, remove } = useCollection<Category>("categories");
   const [showModal, setShowModal] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [form, setForm] = useState({ name: "", icon: "🔧", status: "active" as "active"|"inactive" });
 
@@ -14,15 +16,22 @@ export default function CategoriesPage() {
 
   const openAdd = () => { setEditing(null); setForm({ name:"",icon:"🔧",status:"active" }); setShowModal(true); };
   const openEdit = (c: Category) => { setEditing(c); setForm({ name:c.name,icon:c.icon,status:c.status }); setShowModal(true); };
-  const handleDelete = (id: string) => { if (confirm("Delete category?")) setCats((prev) => prev.filter((c) => c.id !== id)); };
-  const handleSave = () => {
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete category?")) return;
+    try { await remove(id); } catch (err) { alert(`Failed to delete category: ${(err as Error).message}`); }
+  };
+  const handleSave = async () => {
     if (!form.name) return;
-    if (editing) {
-      setCats((prev) => prev.map((c) => c.id === editing.id ? { ...c, ...form } : c));
-    } else {
-      setCats((prev) => [{ id: `c${Date.now()}`, ...form, workerCount: 0 }, ...prev]);
+    setSaving(true);
+    try {
+      if (editing) await update(editing.id, form);
+      else await add({ ...form, workerCount: 0 });
+      setShowModal(false);
+    } catch (err) {
+      alert(`Failed to save category: ${(err as Error).message}`);
+    } finally {
+      setSaving(false);
     }
-    setShowModal(false);
   };
 
   return (
@@ -34,6 +43,10 @@ export default function CategoriesPage() {
             <Plus size={15} /> Add Category
           </button>
         </div>
+
+        {loading && <div className="flex items-center gap-2 text-muted-foreground text-sm py-8 justify-center"><Loader2 size={16} className="animate-spin" />Loading categories…</div>}
+        {error && !loading && <div className="text-center text-red-500 py-8 text-sm bg-card border border-border rounded-xl">Failed to load categories: {error}</div>}
+        {!loading && !error && cats.length === 0 && <div className="text-center text-muted-foreground py-8 text-sm bg-card border border-border rounded-xl">No categories yet. Click "Add Category" to create one.</div>}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {cats.map((c) => (
@@ -70,8 +83,8 @@ export default function CategoriesPage() {
               <div><label className="text-xs font-semibold mb-1 block">Status</label><select className={inputCls} value={form.status} onChange={(e) => setForm({...form,status:e.target.value as "active"|"inactive"})}><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
             </div>
             <div className="flex gap-3 px-6 pb-6">
-              <button onClick={() => setShowModal(false)} className="flex-1 border border-border py-2.5 rounded-xl text-sm hover:bg-muted transition">Cancel</button>
-              <button onClick={handleSave} className="flex-1 bg-primary text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-primary/90 transition">Save</button>
+              <button onClick={() => setShowModal(false)} disabled={saving} className="flex-1 border border-border py-2.5 rounded-xl text-sm hover:bg-muted transition disabled:opacity-50">Cancel</button>
+              <button onClick={handleSave} disabled={saving} className="flex-1 flex items-center justify-center gap-2 bg-primary text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50">{saving && <Loader2 size={14} className="animate-spin" />}Save</button>
             </div>
           </div>
         </div>

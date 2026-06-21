@@ -27,6 +27,20 @@ Firestore and admin saw nothing.
 - Admin reads ALL docs (no auth filter) and writes status via `updateDoc`.
 - Sort newest-first client-side by `createdAt.toMillis()` (avoids composite-index requirement).
 
+**Admin CRUD pattern:** all admin modules (users, categories, cities, reviews,
+advertisements, messages) use a single generic real-time hook
+(`admin-panel/src/hooks/useCollection.ts`): `onSnapshot` live read + `add/update/remove`
+with `serverTimestamp()`, console.logs on every op, throws on failure so pages surface
+real errors (modals stay open on failure). Collection names: `users`, `categories`,
+`cities`, `reviews`, `advertisements` (NOT `ads`), `messages`. The Seed page seeds every
+collection (each only if empty). Dashboard counts read live from these collections.
+
+**Gotcha — Firestore doc-id spread order:** when building an item from a snapshot, write
+`{ ...raw, id: d.id }`, never `{ id: d.id, ...raw }`. If a doc stores its own `id` field
+(legacy/seeded data), the wrong-order spread lets `raw.id` clobber the real document ID and
+later update/delete target the wrong/nonexistent doc. (Per-field-mapped hooks like
+`useWorkers` are safe because `id: d.id` is a discrete property, not part of a spread.)
+
 **Open risk:** Firestore security rules are still open/permissive. Admin panel is NOT
 Firebase-authenticated, yet reads PII (phone/address). Locking rules down will require giving
 admin a Firebase-auth path or it will break admin reads/writes.

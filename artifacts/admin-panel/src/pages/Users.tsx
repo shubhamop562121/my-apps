@@ -1,23 +1,33 @@
 import { useState } from "react";
-import { Search, Trash2, Ban, CheckCircle2 } from "lucide-react";
+import { Search, Trash2, Ban, CheckCircle2, Loader2 } from "lucide-react";
 import Layout from "@/components/Layout";
 import Badge from "@/components/Badge";
-import { users as initialUsers, User } from "@/data/mockData";
+import { User } from "@/data/mockData";
+import { useCollection } from "@/hooks/useCollection";
 
 export default function UsersPage() {
-  const [users, setUsers] = useState(initialUsers);
+  const { items: users, loading, error, update, remove } = useCollection<User>("users");
   const [search, setSearch] = useState("");
 
   const filtered = users.filter((u) =>
     u.name.toLowerCase().includes(search.toLowerCase()) || u.phone.includes(search)
   );
 
-  const toggleBlock = (id: string) => {
-    setUsers((prev) => prev.map((u) => u.id === id ? { ...u, status: u.status === "active" ? "blocked" : "active" } as User : u));
+  const toggleBlock = async (u: User) => {
+    try {
+      await update(u.id, { status: u.status === "active" ? "blocked" : "active" });
+    } catch (err) {
+      alert(`Failed to update user: ${(err as Error).message}`);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Delete this user?")) setUsers((prev) => prev.filter((u) => u.id !== id));
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this user?")) return;
+    try {
+      await remove(id);
+    } catch (err) {
+      alert(`Failed to delete user: ${(err as Error).message}`);
+    }
   };
 
   return (
@@ -61,7 +71,7 @@ export default function UsersPage() {
                     <td className="px-4 py-3"><Badge label={u.status} variant={u.status === "active" ? "success" : "danger"} /></td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <button onClick={() => toggleBlock(u.id)} title={u.status === "active" ? "Block" : "Unblock"} className={`p-1.5 rounded-lg transition ${u.status === "active" ? "hover:bg-amber-50 text-amber-500" : "hover:bg-green-50 text-green-600"}`}>
+                        <button onClick={() => toggleBlock(u)} title={u.status === "active" ? "Block" : "Unblock"} className={`p-1.5 rounded-lg transition ${u.status === "active" ? "hover:bg-amber-50 text-amber-500" : "hover:bg-green-50 text-green-600"}`}>
                           {u.status === "active" ? <Ban size={14} /> : <CheckCircle2 size={14} />}
                         </button>
                         <button onClick={() => handleDelete(u.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-500 transition"><Trash2 size={14} /></button>
@@ -69,7 +79,9 @@ export default function UsersPage() {
                     </td>
                   </tr>
                 ))}
-                {filtered.length === 0 && <tr><td colSpan={7} className="text-center text-muted-foreground py-8 text-sm">No users found</td></tr>}
+                {loading && <tr><td colSpan={7} className="text-center text-muted-foreground py-8 text-sm"><Loader2 size={16} className="animate-spin inline mr-2" />Loading users…</td></tr>}
+                {error && !loading && <tr><td colSpan={7} className="text-center text-red-500 py-8 text-sm">Failed to load users: {error}</td></tr>}
+                {!loading && !error && filtered.length === 0 && <tr><td colSpan={7} className="text-center text-muted-foreground py-8 text-sm">No users found</td></tr>}
               </tbody>
             </table>
           </div>

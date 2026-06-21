@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import { Plus, Edit2, Trash2, Loader2 } from "lucide-react";
 import Layout from "@/components/Layout";
 import Badge from "@/components/Badge";
-import { cities as initialCities, City } from "@/data/mockData";
+import { City } from "@/data/mockData";
+import { useCollection } from "@/hooks/useCollection";
 
 export default function CitiesPage() {
-  const [cities, setCities] = useState(initialCities);
+  const { items: cities, loading, error, add, update, remove } = useCollection<City>("cities");
   const [showModal, setShowModal] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState<City | null>(null);
   const [form, setForm] = useState({ name: "", state: "", status: "active" as "active"|"inactive" });
 
@@ -14,15 +16,22 @@ export default function CitiesPage() {
 
   const openAdd = () => { setEditing(null); setForm({ name:"",state:"",status:"active" }); setShowModal(true); };
   const openEdit = (c: City) => { setEditing(c); setForm({ name:c.name,state:c.state,status:c.status }); setShowModal(true); };
-  const handleDelete = (id: string) => { if (confirm("Delete city?")) setCities((prev) => prev.filter((c) => c.id !== id)); };
-  const handleSave = () => {
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete city?")) return;
+    try { await remove(id); } catch (err) { alert(`Failed to delete city: ${(err as Error).message}`); }
+  };
+  const handleSave = async () => {
     if (!form.name) return;
-    if (editing) {
-      setCities((prev) => prev.map((c) => c.id === editing.id ? { ...c, ...form } : c));
-    } else {
-      setCities((prev) => [{ id: `ct${Date.now()}`, ...form, workerCount: 0 }, ...prev]);
+    setSaving(true);
+    try {
+      if (editing) await update(editing.id, form);
+      else await add({ ...form, workerCount: 0 });
+      setShowModal(false);
+    } catch (err) {
+      alert(`Failed to save city: ${(err as Error).message}`);
+    } finally {
+      setSaving(false);
     }
-    setShowModal(false);
   };
 
   return (
@@ -46,6 +55,9 @@ export default function CitiesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
+                {loading && <tr><td colSpan={5} className="text-center text-muted-foreground py-8 text-sm"><Loader2 size={16} className="animate-spin inline mr-2" />Loading cities…</td></tr>}
+                {error && !loading && <tr><td colSpan={5} className="text-center text-red-500 py-8 text-sm">Failed to load cities: {error}</td></tr>}
+                {!loading && !error && cities.length === 0 && <tr><td colSpan={5} className="text-center text-muted-foreground py-8 text-sm">No cities yet. Click "Add City" to create one.</td></tr>}
                 {cities.map((c) => (
                   <tr key={c.id} className="hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3">
@@ -84,8 +96,8 @@ export default function CitiesPage() {
               <div><label className="text-xs font-semibold mb-1 block">Status</label><select className={inputCls} value={form.status} onChange={(e) => setForm({...form,status:e.target.value as "active"|"inactive"})}><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
             </div>
             <div className="flex gap-3 px-6 pb-6">
-              <button onClick={() => setShowModal(false)} className="flex-1 border border-border py-2.5 rounded-xl text-sm hover:bg-muted transition">Cancel</button>
-              <button onClick={handleSave} className="flex-1 bg-primary text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-primary/90 transition">Save</button>
+              <button onClick={() => setShowModal(false)} disabled={saving} className="flex-1 border border-border py-2.5 rounded-xl text-sm hover:bg-muted transition disabled:opacity-50">Cancel</button>
+              <button onClick={handleSave} disabled={saving} className="flex-1 flex items-center justify-center gap-2 bg-primary text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50">{saving && <Loader2 size={14} className="animate-spin" />}Save</button>
             </div>
           </div>
         </div>

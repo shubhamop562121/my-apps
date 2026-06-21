@@ -3,6 +3,18 @@ import { collection, addDoc, getDocs, deleteDoc, serverTimestamp } from "firebas
 import { db } from "@/lib/firebase";
 import Layout from "@/components/Layout";
 import { Database, Loader2, CheckCircle2, AlertTriangle, Trash2 } from "lucide-react";
+import { users, categories, cities, reviews, ads, messages } from "@/data/mockData";
+
+const stripId = <T extends { id: string }>(rows: T[]) => rows.map(({ id, ...rest }) => rest);
+
+const REFERENCE_COLLECTIONS: { name: string; rows: Record<string, unknown>[] }[] = [
+  { name: "users", rows: stripId(users) },
+  { name: "categories", rows: stripId(categories) },
+  { name: "cities", rows: stripId(cities) },
+  { name: "reviews", rows: stripId(reviews) },
+  { name: "advertisements", rows: stripId(ads) },
+  { name: "messages", rows: stripId(messages) },
+];
 
 const SEED_WORKERS = [
   { name: "Ramesh Kumar", phone: "+91 98765 43210", category: "Plumber", city: "New Delhi", experience: 8, rating: 4.8, reviewCount: 124, status: "active", verified: true, joinedAt: "2024-01-10", description: "Expert plumber with 8 years experience in residential and commercial plumbing.", profession: "Plumber", about: "Experienced plumber with 8 years of expertise in residential and commercial plumbing. Specializes in pipe fitting, leak repairs, and bathroom installations. Available 24/7 for emergency services.", services: ["Pipe Fitting", "Leak Repair", "Bathroom Installation", "Water Heater", "Drain Cleaning"], avatar: "" },
@@ -24,47 +36,63 @@ export default function SeedPage() {
   const [message, setMessage] = useState("");
   const [count, setCount] = useState(0);
 
+  const seedCollection = async (name: string, rows: Record<string, unknown>[]): Promise<string> => {
+    const existing = await getDocs(collection(db, name));
+    if (!existing.empty) {
+      console.log(`[Seed] "${name}" already has ${existing.size} doc(s) — skipped`);
+      return `${name}: skipped (${existing.size} existing)`;
+    }
+    let added = 0;
+    for (const row of rows) {
+      await addDoc(collection(db, name), { ...row, createdAt: serverTimestamp() });
+      added++;
+    }
+    console.log(`[Seed] "${name}" seeded ${added} doc(s)`);
+    return `${name}: +${added}`;
+  };
+
   const handleSeed = async () => {
     setStatus("seeding");
     setMessage("");
+    setCount(0);
     try {
-      const snap = await getDocs(collection(db, "workers"));
-      if (!snap.empty) {
-        setStatus("error");
-        setMessage(`Firestore already has ${snap.size} worker(s). Clear the collection first if you want to re-seed.`);
-        return;
-      }
-      let added = 0;
-      for (const w of SEED_WORKERS) {
-        await addDoc(collection(db, "workers"), { ...w, createdAt: serverTimestamp() });
-        added++;
-        setCount(added);
+      const results: string[] = [];
+      results.push(await seedCollection("workers", SEED_WORKERS));
+      setCount(1);
+      for (let i = 0; i < REFERENCE_COLLECTIONS.length; i++) {
+        const c = REFERENCE_COLLECTIONS[i];
+        results.push(await seedCollection(c.name, c.rows));
+        setCount(i + 2);
       }
       setStatus("done");
-      setMessage(`Successfully seeded ${added} workers into Firestore!`);
+      setMessage(`Seeding complete — ${results.join(" · ")}`);
     } catch (err) {
-      console.error(err);
+      console.error("[Seed] failed:", err);
       setStatus("error");
-      setMessage("Seeding failed. Check Firestore rules and connection.");
+      setMessage(`Seeding failed: ${(err as Error).message}. Check Firestore rules and connection.`);
     }
   };
 
   const handleClear = async () => {
-    if (!confirm("This will permanently delete ALL workers from Firestore. Continue?")) return;
+    if (!confirm("This will permanently delete ALL data (workers, users, categories, cities, reviews, ads, messages) from Firestore. Continue?")) return;
     setStatus("clearing");
     setMessage("");
     try {
-      const snap = await getDocs(collection(db, "workers"));
-      for (const d of snap.docs) {
-        await deleteDoc(d.ref);
+      const names = ["workers", ...REFERENCE_COLLECTIONS.map((c) => c.name)];
+      let total = 0;
+      for (const name of names) {
+        const snap = await getDocs(collection(db, name));
+        for (const d of snap.docs) await deleteDoc(d.ref);
+        console.log(`[Seed] cleared ${snap.size} doc(s) from "${name}"`);
+        total += snap.size;
       }
       setStatus("idle");
-      setMessage(`Cleared ${snap.size} worker(s) from Firestore.`);
+      setMessage(`Cleared ${total} document(s) across all collections.`);
       setCount(0);
     } catch (err) {
-      console.error(err);
+      console.error("[Seed] clear failed:", err);
       setStatus("error");
-      setMessage("Clear failed. Check Firestore rules.");
+      setMessage(`Clear failed: ${(err as Error).message}. Check Firestore rules.`);
     }
   };
 
@@ -74,27 +102,27 @@ export default function SeedPage() {
         <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
           <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
             <Database size={16} className="text-primary" />
-            <h2 className="font-semibold text-foreground text-sm">Seed Workers Collection</h2>
+            <h2 className="font-semibold text-foreground text-sm">Seed All Collections</h2>
           </div>
           <div className="p-5 space-y-4">
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
               <p className="text-sm text-blue-700 font-medium mb-1">What this does</p>
               <p className="text-xs text-blue-600">
-                Writes {SEED_WORKERS.length} sample workers to your Firestore <code className="font-mono bg-blue-100 px-1 rounded">workers</code> collection.
-                Run this once to populate the app with initial data. After seeding, manage workers from the Workers page.
+                Writes sample data to every Firestore collection — <code className="font-mono bg-blue-100 px-1 rounded">workers</code>, <code className="font-mono bg-blue-100 px-1 rounded">users</code>, <code className="font-mono bg-blue-100 px-1 rounded">categories</code>, <code className="font-mono bg-blue-100 px-1 rounded">cities</code>, <code className="font-mono bg-blue-100 px-1 rounded">reviews</code>, <code className="font-mono bg-blue-100 px-1 rounded">advertisements</code>, and <code className="font-mono bg-blue-100 px-1 rounded">messages</code>.
+                Each collection is only seeded if it is currently empty, so it is safe to run more than once. After seeding, manage data from each page.
               </p>
             </div>
 
             {status === "seeding" && (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Loader2 size={16} className="animate-spin text-primary" />
-                <span className="text-sm">Adding worker {count} of {SEED_WORKERS.length}…</span>
+                <span className="text-sm">Seeding collection {count} of {REFERENCE_COLLECTIONS.length + 1}…</span>
               </div>
             )}
             {status === "clearing" && (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Loader2 size={16} className="animate-spin text-red-500" />
-                <span className="text-sm">Clearing workers…</span>
+                <span className="text-sm">Clearing all collections…</span>
               </div>
             )}
             {status === "done" && (
@@ -123,7 +151,7 @@ export default function SeedPage() {
                 className="flex-1 flex items-center justify-center gap-2 bg-primary text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50"
               >
                 {status === "seeding" ? <Loader2 size={14} className="animate-spin" /> : <Database size={14} />}
-                Seed {SEED_WORKERS.length} Workers
+                Seed All Collections
               </button>
               <button
                 onClick={handleClear}

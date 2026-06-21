@@ -1,15 +1,16 @@
 import { useState } from "react";
-import { Search, CheckCircle2, XCircle, Trash2 } from "lucide-react";
+import { Search, CheckCircle2, XCircle, Trash2, Loader2 } from "lucide-react";
 import Layout from "@/components/Layout";
 import Badge from "@/components/Badge";
-import { reviews as initialReviews, Review } from "@/data/mockData";
+import { Review } from "@/data/mockData";
+import { useCollection } from "@/hooks/useCollection";
 
 const Stars = ({ n }: { n: number }) => (
   <span className="text-amber-400 text-sm">{"★".repeat(n)}{"☆".repeat(5 - n)}</span>
 );
 
 export default function ReviewsPage() {
-  const [reviews, setReviews] = useState(initialReviews);
+  const { items: reviews, loading, error, update, remove } = useCollection<Review>("reviews");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
 
@@ -19,9 +20,13 @@ export default function ReviewsPage() {
     return matchSearch && matchFilter;
   });
 
-  const updateStatus = (id: string, status: Review["status"]) =>
-    setReviews((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
-  const handleDelete = (id: string) => { if (confirm("Delete review?")) setReviews((prev) => prev.filter((r) => r.id !== id)); };
+  const updateStatus = async (id: string, status: Review["status"]) => {
+    try { await update(id, { status }); } catch (err) { alert(`Failed to update review: ${(err as Error).message}`); }
+  };
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete review?")) return;
+    try { await remove(id); } catch (err) { alert(`Failed to delete review: ${(err as Error).message}`); }
+  };
 
   return (
     <Layout title="Reviews">
@@ -37,6 +42,9 @@ export default function ReviewsPage() {
             ))}
           </div>
         </div>
+
+        {loading && <div className="flex items-center gap-2 text-muted-foreground text-sm py-8 justify-center"><Loader2 size={16} className="animate-spin" />Loading reviews…</div>}
+        {error && !loading && <div className="text-center text-red-500 py-8 text-sm bg-card border border-border rounded-xl">Failed to load reviews: {error}</div>}
 
         <div className="flex flex-col gap-3">
           {filtered.map((r) => (
