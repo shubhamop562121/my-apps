@@ -26,6 +26,8 @@ export default function BookAppointmentPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [appointmentId, setAppointmentId] = useState("");
 
   if (loading) {
@@ -56,19 +58,28 @@ export default function BookAppointmentPage() {
     return e;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const e = validate();
     setErrors(e);
     if (Object.keys(e).length > 0) return;
 
-    const id = addAppointment({
-      workerId: worker.id,
-      workerName: worker.name,
-      category: worker.profession,
-      ...form,
-    });
-    setAppointmentId(id);
-    setSubmitted(true);
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const id = await addAppointment({
+        workerId: worker.id,
+        workerName: worker.name,
+        category: worker.profession,
+        ...form,
+      });
+      setAppointmentId(id);
+      setSubmitted(true);
+    } catch (err) {
+      console.error("addAppointment failed:", err);
+      setSubmitError("Could not submit your booking. Please check your connection and try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const inputCls = (field: string) =>
@@ -248,11 +259,17 @@ export default function BookAppointmentPage() {
           </div>
         </div>
 
+        {submitError && (
+          <p className="text-center text-xs text-destructive">{submitError}</p>
+        )}
+
         <button
           onClick={handleSubmit}
-          className="w-full bg-primary text-white py-4 rounded-2xl font-bold text-sm shadow-md mt-1"
+          disabled={submitting}
+          className="w-full bg-primary text-white py-4 rounded-2xl font-bold text-sm shadow-md mt-1 flex items-center justify-center gap-2 disabled:opacity-60"
         >
-          Confirm Booking
+          {submitting && <Loader2 size={16} className="animate-spin" />}
+          {submitting ? "Submitting…" : "Confirm Booking"}
         </button>
 
         <p className="text-center text-xs text-muted-foreground pb-2">

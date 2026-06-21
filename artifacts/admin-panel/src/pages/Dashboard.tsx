@@ -5,11 +5,14 @@ import StatCard from "@/components/StatCard";
 import Badge from "@/components/Badge";
 import { dashboardStats, users } from "@/data/mockData";
 import { useWorkers } from "@/hooks/useWorkers";
+import { useAppointments } from "@/hooks/useAppointments";
 
 const PIE_COLORS = ["#1D4ED8","#16A34A","#F59E0B","#EF4444","#8B5CF6","#6B7280"];
 
 export default function Dashboard() {
   const { workers } = useWorkers();
+  const { appointments } = useAppointments();
+  const pendingAppointments = appointments.filter((a) => a.status === "Pending").length;
 
   const recentWorkers = workers.slice(0, 5);
 
@@ -30,13 +33,13 @@ export default function Dashboard() {
           <StatCard title="Total Users" value={dashboardStats.totalUsers} icon={Users} color="text-blue-600" bg="bg-blue-100" change="+2 this week" />
           <StatCard title="Total Workers" value={workers.length} icon={HardHat} color="text-green-600" bg="bg-green-100" change="Live from Firestore" />
           <StatCard title="Categories" value={dashboardStats.totalCategories} icon={Grid3x3} color="text-purple-600" bg="bg-purple-100" />
-          <StatCard title="Pending Appts." value={dashboardStats.pendingAppointments} icon={CalendarCheck} color="text-amber-600" bg="bg-amber-100" change="Needs review" />
+          <StatCard title="Pending Appts." value={pendingAppointments} icon={CalendarCheck} color="text-amber-600" bg="bg-amber-100" change="Needs review" />
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard title="Cities" value={dashboardStats.totalCities} icon={MapPin} color="text-teal-600" bg="bg-teal-100" />
           <StatCard title="Reviews" value={dashboardStats.totalReviews} icon={Star} color="text-yellow-500" bg="bg-yellow-100" />
           <StatCard title="Active Ads" value={dashboardStats.activeAds} icon={Megaphone} color="text-red-600" bg="bg-red-100" />
-          <StatCard title="Total Appointments" value={7} icon={CalendarCheck} color="text-indigo-600" bg="bg-indigo-100" />
+          <StatCard title="Total Appointments" value={appointments.length} icon={CalendarCheck} color="text-indigo-600" bg="bg-indigo-100" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

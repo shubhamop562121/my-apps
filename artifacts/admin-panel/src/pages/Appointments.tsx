@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Search, CheckCircle2, XCircle, UserCheck, Play, Trophy } from "lucide-react";
 import Layout from "@/components/Layout";
 import Badge from "@/components/Badge";
-import { appointments as initialApts, Appointment } from "@/data/mockData";
+import type { Appointment } from "@/data/mockData";
 import { useWorkers } from "@/hooks/useWorkers";
+import { useAppointments } from "@/hooks/useAppointments";
 
 type BadgeVariant = "success" | "danger" | "warning" | "info" | "neutral";
 
@@ -24,13 +25,15 @@ const categoryIcons: Record<string, string> = {
 
 export default function AppointmentsPage() {
   const { workers } = useWorkers();
-  const [apts, setApts] = useState<Appointment[]>(initialApts);
+  const { appointments: apts, updateAppointment } = useAppointments();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
-  const [selected, setSelected] = useState<Appointment | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [assignWorker, setAssignWorker] = useState("");
   const [rejectNote, setRejectNote] = useState("");
   const [showRejectInput, setShowRejectInput] = useState(false);
+
+  const selected = apts.find((a) => a.id === selectedId) ?? null;
 
   const statuses = ["All", "Pending", "Approved", "Assigned", "In Progress", "Completed", "Rejected"];
   const pendingCount = apts.filter((a) => a.status === "Pending").length;
@@ -45,8 +48,7 @@ export default function AppointmentsPage() {
   });
 
   const update = (id: string, patch: Partial<Appointment>) => {
-    setApts((prev) => prev.map((a) => (a.id === id ? { ...a, ...patch } : a)));
-    setSelected((s) => (s?.id === id ? { ...s, ...patch } : s));
+    void updateAppointment(id, patch);
   };
 
   const handleApprove = (a: Appointment) => update(a.id, { status: "Approved" });
@@ -118,7 +120,7 @@ export default function AppointmentsPage() {
                   {filtered.map((a) => (
                     <tr
                       key={a.id}
-                      onClick={() => setSelected(a)}
+                      onClick={() => setSelectedId(a.id)}
                       className={`hover:bg-muted/30 transition-colors cursor-pointer ${selected?.id === a.id ? "bg-primary/5" : ""}`}
                     >
                       <td className="px-4 py-3">
@@ -146,11 +148,11 @@ export default function AppointmentsPage() {
                           {a.status === "Pending" && (
                             <>
                               <button onClick={() => handleApprove(a)} title="Approve" className="p-1.5 rounded-lg hover:bg-green-50 text-green-600 transition"><CheckCircle2 size={14} /></button>
-                              <button onClick={() => { setSelected(a); setShowRejectInput(true); }} title="Reject" className="p-1.5 rounded-lg hover:bg-red-50 text-red-500 transition"><XCircle size={14} /></button>
+                              <button onClick={() => { setSelectedId(a.id); setShowRejectInput(true); }} title="Reject" className="p-1.5 rounded-lg hover:bg-red-50 text-red-500 transition"><XCircle size={14} /></button>
                             </>
                           )}
                           {a.status === "Approved" && (
-                            <button onClick={() => setSelected(a)} title="Assign Worker" className="p-1.5 rounded-lg hover:bg-blue-50 text-blue-600 transition"><UserCheck size={14} /></button>
+                            <button onClick={() => setSelectedId(a.id)} title="Assign Worker" className="p-1.5 rounded-lg hover:bg-blue-50 text-blue-600 transition"><UserCheck size={14} /></button>
                           )}
                           {a.status === "Assigned" && (
                             <button onClick={() => handleStart(a)} title="Start" className="p-1.5 rounded-lg hover:bg-purple-50 text-purple-600 transition"><Play size={14} /></button>
@@ -179,7 +181,7 @@ export default function AppointmentsPage() {
             <div className="bg-card border border-border rounded-xl shadow-sm p-5 sticky top-20">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-foreground text-sm">Appointment Details</h3>
-                <button onClick={() => { setSelected(null); setShowRejectInput(false); }} className="text-muted-foreground hover:text-foreground text-xl leading-none">×</button>
+                <button onClick={() => { setSelectedId(null); setShowRejectInput(false); }} className="text-muted-foreground hover:text-foreground text-xl leading-none">×</button>
               </div>
 
               <div className="space-y-3">

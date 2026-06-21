@@ -4,7 +4,7 @@ import {
   Star, Megaphone, MessageSquare, Settings, LogOut, ChevronRight, CalendarCheck, Database,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { appointments } from "@/data/mockData";
+import { useAppointments } from "@/hooks/useAppointments";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/" },
@@ -23,6 +23,7 @@ const navItems = [
 export default function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [location, setLocation] = useLocation();
   const { logout, admin } = useAuth();
+  const { appointments } = useAppointments();
   const pendingCount = appointments.filter((a) => a.status === "Pending").length;
 
   const handleNav = (href: string) => {

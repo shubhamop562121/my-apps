@@ -1,4 +1,9 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import {
+  collection, addDoc, onSnapshot, serverTimestamp, query, where,
+} from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { db, auth } from "@/lib/firebase";
 
 export type Appointment = {
   id: string;
@@ -16,77 +21,96 @@ export type Appointment = {
   bookedAt: string;
 };
 
+type NewAppointment = Omit<Appointment, "id" | "bookedAt" | "status">;
+
 type AppointmentsContextType = {
   appointments: Appointment[];
-  addAppointment: (a: Omit<Appointment, "id" | "bookedAt" | "status">) => string;
+  loading: boolean;
+  addAppointment: (a: NewAppointment) => Promise<string>;
 };
 
 const AppointmentsContext = createContext<AppointmentsContextType | null>(null);
 
-const initial: Appointment[] = [
-  {
-    id: "apt1",
-    workerId: "w1",
-    workerName: "Ramesh Kumar",
-    category: "Plumber",
-    userName: "Rahul Sharma",
-    userPhone: "+91 98765 43210",
-    address: "45, Lajpat Nagar, New Delhi",
-    description: "Kitchen sink leaking, needs urgent repair",
-    preferredDate: "2024-01-15",
-    preferredTime: "10:00 AM",
-    status: "Completed",
-    assignedWorkerName: "Ramesh Kumar",
-    bookedAt: "2024-01-14",
-  },
-  {
-    id: "apt2",
-    workerId: "w2",
-    workerName: "Suresh Sharma",
-    category: "Electrician",
-    userName: "Rahul Sharma",
-    userPhone: "+91 98765 43210",
-    address: "45, Lajpat Nagar, New Delhi",
-    description: "Main switch board replacement needed",
-    preferredDate: "2024-01-20",
-    preferredTime: "2:00 PM",
-    status: "In Progress",
-    assignedWorkerName: "Suresh Sharma",
-    bookedAt: "2024-01-18",
-  },
-  {
-    id: "apt3",
-    workerId: "w5",
-    workerName: "Dinesh Patel",
-    category: "AC Repair",
-    userName: "Rahul Sharma",
-    userPhone: "+91 98765 43210",
-    address: "45, Lajpat Nagar, New Delhi",
-    description: "AC not cooling properly, gas may be low",
-    preferredDate: "2024-01-22",
-    preferredTime: "11:00 AM",
-    status: "Approved",
-    bookedAt: "2024-01-20",
-  },
-];
+function mapDoc(id: string, raw: Record<string, unknown>): Appointment {
+  return {
+    id,
+    workerId: (raw.workerId as string) ?? "",
+    workerName: (raw.workerName as string) ?? "",
+    category: (raw.category as string) ?? "",
+    userName: (raw.userName as string) ?? "",
+    userPhone: (raw.userPhone as string) ?? "",
+    address: (raw.address as string) ?? "",
+    description: (raw.description as string) ?? "",
+    preferredDate: (raw.preferredDate as string) ?? "",
+    preferredTime: (raw.preferredTime as string) ?? "",
+    status: (raw.status as Appointment["status"]) ?? "Pending",
+    assignedWorkerName: (raw.assignedWorkerName as string) ?? undefined,
+    bookedAt: (raw.bookedAt as string) ?? "",
+  };
+}
 
 export function AppointmentsProvider({ children }: { children: ReactNode }) {
-  const [appointments, setAppointments] = useState<Appointment[]>(initial);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const addAppointment = (a: Omit<Appointment, "id" | "bookedAt" | "status">): string => {
-    const id = `apt${Date.now()}`;
-    const newApt: Appointment = {
+  useEffect(() => {
+    let unsubSnap: (() => void) | null = null;
+
+    const unsubAuth = onAuthStateChanged(auth, (u) => {
+      if (unsubSnap) {
+        unsubSnap();
+        unsubSnap = null;
+      }
+      if (!u) {
+        setAppointments([]);
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      // Only the signed-in user's own appointments.
+      unsubSnap = onSnapshot(
+        query(collection(db, "appointments"), where("userId", "==", u.uid)),
+        (snap) => {
+          const rows = snap.docs.map((d) => {
+            const raw = d.data() as Record<string, unknown>;
+            const createdAt = raw.createdAt as { toMillis?: () => number } | undefined;
+            return {
+              createdMs: createdAt?.toMillis ? createdAt.toMillis() : 0,
+              apt: mapDoc(d.id, raw),
+            };
+          });
+          rows.sort((a, b) => b.createdMs - a.createdMs);
+          setAppointments(rows.map((r) => r.apt));
+          setLoading(false);
+        },
+        (err) => {
+          console.error("Firestore appointments error:", err);
+          setLoading(false);
+        },
+      );
+    });
+
+    return () => {
+      if (unsubSnap) unsubSnap();
+      unsubAuth();
+    };
+  }, []);
+
+  const addAppointment = async (a: NewAppointment): Promise<string> => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) throw new Error("You must be signed in to book an appointment.");
+    const ref = await addDoc(collection(db, "appointments"), {
       ...a,
-      id,
+      userId: uid,
       status: "Pending",
       bookedAt: new Date().toISOString().split("T")[0],
-    };
-    setAppointments((prev) => [newApt, ...prev]);
-    return id;
+      createdAt: serverTimestamp(),
+    });
+    return ref.id;
   };
 
   return (
-    <AppointmentsContext.Provider value={{ appointments, addAppointment }}>
+    <AppointmentsContext.Provider value={{ appointments, loading, addAppointment }}>
       {children}
     </AppointmentsContext.Provider>
   );
