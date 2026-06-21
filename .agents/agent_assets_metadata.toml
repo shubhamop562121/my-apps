@@ -6,3 +6,9 @@ id = "NqVc-V4JJI_RznLiDuMLs"
 uri = "file://KaamMitra-Deployment-Guide.md"
 type = "text"
 title = "KaamMitra Deployment Guide (rules, admin setup, APK/AAB, Play Store)"
+
+[[outputs]]
+id = "NjFoFLhdwpIaeaeKeEf_q"
+uri = "file://KaamMitra-project.tar.gz"
+type = "unspecified"
+title = "KaamMitra full project (source code + deployment guide)"
