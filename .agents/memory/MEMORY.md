@@ -1,0 +1,1 @@
+- [Firebase Phone OTP auth](firebase-phone-auth.md) — phone login needs Console actions (enable Phone, add authorized domain); RecaptchaVerifier v12 takes auth as first arg.

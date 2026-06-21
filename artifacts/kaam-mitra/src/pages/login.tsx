@@ -1,15 +1,28 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowLeft, Phone } from "lucide-react";
+import { ArrowLeft, Phone, Loader2, AlertCircle } from "lucide-react";
+import { useAuth, authErrorMessage } from "@/context/AuthContext";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
+  const { sendOTP } = useAuth();
   const [phone, setPhone] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSendOtp = () => {
-    if (phone.length >= 10) {
+  const handleSendOtp = async () => {
+    if (phone.length < 10 || loading) return;
+    setLoading(true);
+    setError("");
+    try {
+      await sendOTP("+91" + phone);
+      sessionStorage.setItem("km_phone", phone);
       setLocation("/otp");
+    } catch (err) {
+      setError(authErrorMessage(err));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,7 +60,11 @@ export default function LoginPage() {
               type="tel"
               placeholder="Enter 10-digit number"
               value={phone}
-              onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+              onChange={(e) => {
+                setPhone(e.target.value.replace(/\D/g, "").slice(0, 10));
+                if (error) setError("");
+              }}
+              onKeyDown={(e) => e.key === "Enter" && handleSendOtp()}
               className="flex-1 bg-transparent text-sm font-medium text-foreground outline-none placeholder:text-muted-foreground"
               data-testid="input-phone"
             />
@@ -56,13 +73,21 @@ export default function LoginPage() {
           <p className="text-xs text-muted-foreground mt-2 ml-1">We'll send an OTP to verify your number</p>
         </div>
 
+        {error && (
+          <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
+            <AlertCircle size={16} className="text-red-500 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
+
         <button
           onClick={handleSendOtp}
-          disabled={phone.length < 10}
-          className="w-full bg-primary text-primary-foreground py-4 rounded-2xl font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+          disabled={phone.length < 10 || loading}
+          className="w-full bg-primary text-primary-foreground py-4 rounded-2xl font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-all flex items-center justify-center gap-2"
           data-testid="btn-send-otp"
         >
-          Send OTP
+          {loading && <Loader2 size={18} className="animate-spin" />}
+          {loading ? "Sending OTP…" : "Send OTP"}
         </button>
 
         <div className="mt-8 p-4 bg-muted rounded-2xl">

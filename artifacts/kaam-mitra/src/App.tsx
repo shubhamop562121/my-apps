@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import MobileFrame from "@/components/MobileFrame";
 import { SavedProvider } from "@/context/SavedContext";
 import { AppointmentsProvider } from "@/context/AppointmentsContext";
+import { AuthProvider } from "@/context/AuthContext";
 import SplashPage from "@/pages/splash";
 import WelcomePage from "@/pages/welcome";
 import LoginPage from "@/pages/login";
@@ -62,13 +63,15 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AppointmentsProvider>
-          <SavedProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Router />
-            </WouterRouter>
-          </SavedProvider>
-        </AppointmentsProvider>
+        <AuthProvider>
+          <AppointmentsProvider>
+            <SavedProvider>
+              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                <Router />
+              </WouterRouter>
+            </SavedProvider>
+          </AppointmentsProvider>
+        </AuthProvider>
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>

@@ -5,6 +5,7 @@ import {
   ChevronRight, Phone, MapPin, Edit3, PenLine,
 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
+import { useAuth } from "@/context/AuthContext";
 
 const menuItems = [
   { icon: Bookmark, label: "Saved Workers", href: "/saved", color: "text-primary" },
@@ -15,6 +16,25 @@ const menuItems = [
 
 export default function ProfilePage() {
   const [, setLocation] = useLocation();
+  const { user, logout } = useAuth();
+
+  const phoneNumber = user?.phoneNumber ?? "+91 98765 43210";
+  const displayName = user?.displayName ?? "KaamMitra User";
+  const initials = displayName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch {
+      // ignore — navigate away regardless
+    }
+    setLocation("/welcome");
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-20">
@@ -31,13 +51,13 @@ export default function ProfilePage() {
         </div>
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-white text-2xl font-bold">
-            RS
+            {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-white text-lg font-bold">Rahul Sharma</h2>
+            <h2 className="text-white text-lg font-bold">{displayName}</h2>
             <div className="flex items-center gap-1.5 mt-0.5">
               <Phone size={12} className="text-white/70" />
-              <span className="text-white/70 text-xs">+91 98765 43210</span>
+              <span className="text-white/70 text-xs">{phoneNumber}</span>
             </div>
             <button
               onClick={() => setLocation("/edit-address")}
@@ -88,7 +108,7 @@ export default function ProfilePage() {
         </motion.div>
 
         <button
-          onClick={() => setLocation("/welcome")}
+          onClick={handleLogout}
           className="w-full flex items-center gap-3 px-4 py-4 bg-red-50 rounded-2xl border border-red-100"
           data-testid="btn-logout"
         >
