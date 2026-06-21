@@ -16,6 +16,13 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 
+// Runtime diagnostic: confirm which Firebase project the app is actually wired to.
+console.log(
+  "[Firebase] runtime config →",
+  "projectId:", auth.app.options.projectId,
+  "| authDomain:", auth.app.options.authDomain,
+);
+
 // Keep the user signed in across refreshes and browser restarts.
 setPersistence(auth, browserLocalPersistence).catch(() => {
   console.warn("Auth: could not set local persistence — using default.");
