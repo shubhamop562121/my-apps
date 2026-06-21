@@ -1,18 +1,20 @@
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { MapPin, Bell, Search, ChevronRight } from "lucide-react";
+import { MapPin, Bell, Search, ChevronRight, Loader2 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import WorkerCard from "@/components/WorkerCard";
 import CategoryIcon from "@/components/CategoryIcon";
-import { workers, categories } from "@/data/mockData";
+import { categories } from "@/data/mockData";
 import { useSaved } from "@/context/SavedContext";
-
-const popularWorkers = workers.slice(0, 5);
-const recentWorkers = workers.slice(5, 9);
+import { useWorkers } from "@/hooks/useWorkers";
 
 export default function HomePage() {
   const [, setLocation] = useLocation();
   const { savedIds, toggleSave } = useSaved();
+  const { workers, loading } = useWorkers();
+
+  const popularWorkers = workers.slice(0, 5);
+  const recentWorkers = workers.slice(5, 9);
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-20">
@@ -81,29 +83,41 @@ export default function HomePage() {
             See all <ChevronRight size={14} />
           </button>
         </div>
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none -mx-5 px-5">
-          {popularWorkers.map((w) => (
-            <div key={w.id} className="flex-shrink-0 w-[200px]">
-              <WorkerCard worker={w} horizontal saved={savedIds.has(w.id)} onToggleSave={toggleSave} />
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
+            <Loader2 size={18} className="animate-spin" />
+            <span className="text-sm">Loading workers…</span>
+          </div>
+        ) : (
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none -mx-5 px-5">
+            {popularWorkers.map((w) => (
+              <div key={w.id} className="flex-shrink-0 w-[200px]">
+                <WorkerCard worker={w} horizontal saved={savedIds.has(w.id)} onToggleSave={toggleSave} />
+              </div>
+            ))}
+            {popularWorkers.length === 0 && (
+              <p className="text-sm text-muted-foreground py-4">No workers yet. Check back soon!</p>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="px-5 pt-7 pb-2">
         <h2 className="text-base font-bold text-foreground mb-4">Recently Added</h2>
-        <div className="flex flex-col gap-3">
-          {recentWorkers.map((w, i) => (
-            <motion.div
-              key={w.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.07 }}
-            >
-              <WorkerCard worker={w} saved={savedIds.has(w.id)} onToggleSave={toggleSave} />
-            </motion.div>
-          ))}
-        </div>
+        {!loading && (
+          <div className="flex flex-col gap-3">
+            {recentWorkers.map((w, i) => (
+              <motion.div
+                key={w.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.07 }}
+              >
+                <WorkerCard worker={w} saved={savedIds.has(w.id)} onToggleSave={toggleSave} />
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
 
       <BottomNav />

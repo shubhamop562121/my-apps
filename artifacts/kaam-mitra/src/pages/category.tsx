@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { useLocation, useRoute } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowLeft, Search, SlidersHorizontal, Users } from "lucide-react";
+import { ArrowLeft, Search, SlidersHorizontal, Users, Loader2 } from "lucide-react";
 import WorkerCard from "@/components/WorkerCard";
 import EmptyState from "@/components/EmptyState";
-import { workers, categories, savedWorkerIds } from "@/data/mockData";
+import { categories } from "@/data/mockData";
+import { useSaved } from "@/context/SavedContext";
+import { useWorkers } from "@/hooks/useWorkers";
 
 export default function CategoryPage() {
   const [, setLocation] = useLocation();
   const [, params] = useRoute("/category/:slug");
   const slug = params?.slug ?? "";
   const [query, setQuery] = useState("");
-  const [saved, setSaved] = useState<Set<string>>(new Set(savedWorkerIds));
+  const { savedIds, toggleSave } = useSaved();
+  const { workers, loading } = useWorkers();
 
   const cat = categories.find((c) => c.slug === slug);
   const allCatWorkers = workers.filter((w) => w.category === slug);
@@ -20,15 +23,6 @@ export default function CategoryPage() {
       w.name.toLowerCase().includes(query.toLowerCase()) ||
       w.city.toLowerCase().includes(query.toLowerCase())
   );
-
-  const toggleSave = (id: string) => {
-    setSaved((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-8">
@@ -43,7 +37,9 @@ export default function CategoryPage() {
           </button>
           <div className="flex-1">
             <h1 className="text-lg font-bold text-foreground">{cat?.label ?? "Category"}</h1>
-            <p className="text-xs text-muted-foreground">{allCatWorkers.length} workers available</p>
+            <p className="text-xs text-muted-foreground">
+              {loading ? "Loading…" : `${allCatWorkers.length} workers available`}
+            </p>
           </div>
         </div>
 
@@ -70,12 +66,21 @@ export default function CategoryPage() {
       </div>
 
       <div className="px-5 pt-5">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-16 gap-2 text-muted-foreground">
+            <Loader2 size={18} className="animate-spin" />
+            <span className="text-sm">Loading workers…</span>
+          </div>
+        ) : filtered.length === 0 ? (
           <EmptyState
             icon={Users}
-            title="No Workers Found"
-            subtitle="Try adjusting your search or check back later."
-            ctaLabel="Go Back"
+            title={allCatWorkers.length === 0 ? "No Workers Yet" : "No Workers Found"}
+            subtitle={
+              allCatWorkers.length === 0
+                ? `No ${cat?.label} workers have registered in your area yet.`
+                : "Try adjusting your search or check back later."
+            }
+            ctaLabel={allCatWorkers.length === 0 ? "Explore Other Categories" : "Go Back"}
             ctaHref="/home"
           />
         ) : (
@@ -87,20 +92,10 @@ export default function CategoryPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.06 }}
               >
-                <WorkerCard worker={w} saved={saved.has(w.id)} onToggleSave={toggleSave} />
+                <WorkerCard worker={w} saved={savedIds.has(w.id)} onToggleSave={toggleSave} />
               </motion.div>
             ))}
           </div>
-        )}
-
-        {allCatWorkers.length === 0 && (
-          <EmptyState
-            icon={Users}
-            title="No Workers Yet"
-            subtitle={`No ${cat?.label} workers have registered in your area yet.`}
-            ctaLabel="Explore Other Categories"
-            ctaHref="/home"
-          />
         )}
       </div>
     </div>

@@ -2,21 +2,33 @@ import { useLocation, useRoute } from "wouter";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, MapPin, Star, BadgeCheck,
-  Bookmark, Briefcase, Shield, CalendarDays,
+  Bookmark, Briefcase, Shield, CalendarDays, Loader2,
 } from "lucide-react";
-import { workers } from "@/data/mockData";
+import { useWorkers } from "@/hooks/useWorkers";
 import { useSaved } from "@/context/SavedContext";
 
 export default function WorkerDetailPage() {
   const [, setLocation] = useLocation();
   const [, params] = useRoute("/worker/:id");
-  const worker = workers.find((w) => w.id === params?.id);
+  const { workers, loading } = useWorkers();
   const { isSaved, toggleSave } = useSaved();
+
+  const worker = workers.find((w) => w.id === params?.id);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen gap-2 text-muted-foreground">
+        <Loader2 size={20} className="animate-spin" />
+        <span className="text-sm">Loading worker profile…</span>
+      </div>
+    );
+  }
 
   if (!worker) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex flex-col items-center justify-center min-h-screen gap-3">
         <p className="text-muted-foreground">Worker not found.</p>
+        <button onClick={() => setLocation("/home")} className="text-sm text-primary font-semibold">Go Home</button>
       </div>
     );
   }
@@ -24,7 +36,7 @@ export default function WorkerDetailPage() {
   const saved = isSaved(worker.id);
   const initials = worker.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
   const bgColors = ["bg-orange-100 text-orange-700", "bg-blue-100 text-blue-700", "bg-amber-100 text-amber-700", "bg-purple-100 text-purple-700", "bg-rose-100 text-rose-700"];
-  const colorClass = bgColors[worker.id.charCodeAt(1) % bgColors.length];
+  const colorClass = bgColors[worker.id.charCodeAt(worker.id.length - 1) % bgColors.length];
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -117,24 +129,26 @@ export default function WorkerDetailPage() {
           <p className="text-sm text-muted-foreground leading-relaxed">{worker.about}</p>
         </motion.div>
 
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.15 }}
-          className="mt-4 bg-white rounded-3xl shadow-sm border border-border p-5"
-        >
-          <h2 className="font-bold text-sm text-foreground mb-3">Services Offered</h2>
-          <div className="flex flex-wrap gap-2">
-            {worker.services.map((s) => (
-              <span
-                key={s}
-                className="bg-primary/10 text-primary px-3 py-1.5 rounded-xl text-xs font-medium"
-              >
-                {s}
-              </span>
-            ))}
-          </div>
-        </motion.div>
+        {worker.services.length > 0 && (
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.15 }}
+            className="mt-4 bg-white rounded-3xl shadow-sm border border-border p-5"
+          >
+            <h2 className="font-bold text-sm text-foreground mb-3">Services Offered</h2>
+            <div className="flex flex-wrap gap-2">
+              {worker.services.map((s) => (
+                <span
+                  key={s}
+                  className="bg-primary/10 text-primary px-3 py-1.5 rounded-xl text-xs font-medium"
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         <motion.div
           initial={{ y: 20, opacity: 0 }}

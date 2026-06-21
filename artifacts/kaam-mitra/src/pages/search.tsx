@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Search, X, Clock } from "lucide-react";
+import { ArrowLeft, Search, X, Clock, Loader2 } from "lucide-react";
 import WorkerCard from "@/components/WorkerCard";
 import EmptyState from "@/components/EmptyState";
-import { workers } from "@/data/mockData";
+import { useWorkers } from "@/hooks/useWorkers";
 
 const recentSearches = ["Plumber Delhi", "Electrician", "AC Repair Mumbai", "Carpenter"];
 
@@ -12,6 +12,7 @@ export default function SearchPage() {
   const [, setLocation] = useLocation();
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const { workers, loading } = useWorkers();
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -58,68 +59,75 @@ export default function SearchPage() {
       </div>
 
       <div className="px-5 pt-5 flex-1">
-        <AnimatePresence mode="wait">
-          {!query && (
-            <motion.div
-              key="recent"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Recent Searches</p>
-              <div className="flex flex-col gap-2">
-                {recentSearches.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setQuery(s)}
-                    className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors text-left"
-                    data-testid={`btn-recent-${s.replace(/\s+/g, "-").toLowerCase()}`}
-                  >
-                    <Clock size={15} className="text-muted-foreground flex-shrink-0" />
-                    <span className="text-sm text-foreground">{s}</span>
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          )}
+        {loading && query ? (
+          <div className="flex items-center justify-center py-12 gap-2 text-muted-foreground">
+            <Loader2 size={18} className="animate-spin" />
+            <span className="text-sm">Loading workers…</span>
+          </div>
+        ) : (
+          <AnimatePresence mode="wait">
+            {!query && (
+              <motion.div
+                key="recent"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Recent Searches</p>
+                <div className="flex flex-col gap-2">
+                  {recentSearches.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setQuery(s)}
+                      className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors text-left"
+                      data-testid={`btn-recent-${s.replace(/\s+/g, "-").toLowerCase()}`}
+                    >
+                      <Clock size={15} className="text-muted-foreground flex-shrink-0" />
+                      <span className="text-sm text-foreground">{s}</span>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
-          {query && filtered.length > 0 && (
-            <motion.div
-              key="results"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                {filtered.length} Result{filtered.length !== 1 ? "s" : ""} found
-              </p>
-              <div className="flex flex-col gap-3">
-                {filtered.map((w, i) => (
-                  <motion.div
-                    key={w.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                  >
-                    <WorkerCard worker={w} />
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          )}
+            {query && filtered.length > 0 && (
+              <motion.div
+                key="results"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                  {filtered.length} Result{filtered.length !== 1 ? "s" : ""} found
+                </p>
+                <div className="flex flex-col gap-3">
+                  {filtered.map((w, i) => (
+                    <motion.div
+                      key={w.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                    >
+                      <WorkerCard worker={w} />
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
-          {query && filtered.length === 0 && (
-            <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <EmptyState
-                icon={Search}
-                title="No Workers Found"
-                subtitle={`No results for "${query}". Try a different name, profession, or city.`}
-                ctaLabel="Browse All"
-                ctaHref="/home"
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+            {query && !loading && filtered.length === 0 && (
+              <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <EmptyState
+                  icon={Search}
+                  title="No Workers Found"
+                  subtitle={`No results for "${query}". Try a different name, profession, or city.`}
+                  ctaLabel="Browse All"
+                  ctaHref="/home"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
       </div>
     </div>
   );

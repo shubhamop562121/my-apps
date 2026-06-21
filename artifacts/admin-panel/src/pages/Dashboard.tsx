@@ -3,17 +3,32 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import Layout from "@/components/Layout";
 import StatCard from "@/components/StatCard";
 import Badge from "@/components/Badge";
-import { dashboardStats } from "@/data/mockData";
+import { dashboardStats, users } from "@/data/mockData";
+import { useWorkers } from "@/hooks/useWorkers";
 
 const PIE_COLORS = ["#1D4ED8","#16A34A","#F59E0B","#EF4444","#8B5CF6","#6B7280"];
 
 export default function Dashboard() {
+  const { workers } = useWorkers();
+
+  const recentWorkers = workers.slice(0, 5);
+
+  const workersByCategory = Object.entries(
+    workers.reduce<Record<string, number>>((acc, w) => {
+      acc[w.category] = (acc[w.category] ?? 0) + 1;
+      return acc;
+    }, {})
+  )
+    .map(([category, count]) => ({ category, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6);
+
   return (
     <Layout title="Dashboard">
       <div className="space-y-6">
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           <StatCard title="Total Users" value={dashboardStats.totalUsers} icon={Users} color="text-blue-600" bg="bg-blue-100" change="+2 this week" />
-          <StatCard title="Total Workers" value={dashboardStats.totalWorkers} icon={HardHat} color="text-green-600" bg="bg-green-100" change="+3 this week" />
+          <StatCard title="Total Workers" value={workers.length} icon={HardHat} color="text-green-600" bg="bg-green-100" change="Live from Firestore" />
           <StatCard title="Categories" value={dashboardStats.totalCategories} icon={Grid3x3} color="text-purple-600" bg="bg-purple-100" />
           <StatCard title="Pending Appts." value={dashboardStats.pendingAppointments} icon={CalendarCheck} color="text-amber-600" bg="bg-amber-100" change="Needs review" />
         </div>
@@ -49,8 +64,16 @@ export default function Dashboard() {
             </div>
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
-                <Pie data={dashboardStats.workersByCategory} dataKey="count" nameKey="category" cx="50%" cy="50%" outerRadius={75} innerRadius={40}>
-                  {dashboardStats.workersByCategory.map((_, i) => (
+                <Pie
+                  data={workersByCategory.length > 0 ? workersByCategory : dashboardStats.workersByCategory}
+                  dataKey="count"
+                  nameKey="category"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={75}
+                  innerRadius={40}
+                >
+                  {(workersByCategory.length > 0 ? workersByCategory : dashboardStats.workersByCategory).map((_, i) => (
                     <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                   ))}
                 </Pie>
@@ -70,7 +93,9 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="divide-y divide-border">
-              {dashboardStats.recentWorkers.map((w) => (
+              {recentWorkers.length === 0 ? (
+                <p className="text-sm text-muted-foreground px-5 py-4">No workers yet.</p>
+              ) : recentWorkers.map((w) => (
                 <div key={w.id} className="flex items-center justify-between px-5 py-3">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-bold flex-shrink-0">
@@ -95,7 +120,7 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="divide-y divide-border">
-              {dashboardStats.recentUsers.map((u) => (
+              {users.slice(0, 5).map((u) => (
                 <div key={u.id} className="flex items-center justify-between px-5 py-3">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-700 text-xs font-bold flex-shrink-0">

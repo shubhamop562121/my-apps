@@ -1,7 +1,7 @@
 import { useLocation } from "wouter";
 import {
   LayoutDashboard, Users, HardHat, Grid3x3, MapPin,
-  Star, Megaphone, MessageSquare, Settings, LogOut, ChevronRight, CalendarCheck,
+  Star, Megaphone, MessageSquare, Settings, LogOut, ChevronRight, CalendarCheck, Database,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { appointments } from "@/data/mockData";
@@ -17,6 +17,7 @@ const navItems = [
   { icon: Megaphone, label: "Advertisements", href: "/ads" },
   { icon: MessageSquare, label: "Messages", href: "/messages" },
   { icon: Settings, label: "Settings", href: "/settings" },
+  { icon: Database, label: "Seed Database", href: "/seed" },
 ];
 
 export default function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {

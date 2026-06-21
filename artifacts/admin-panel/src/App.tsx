@@ -12,6 +12,7 @@ import AdsPage from "@/pages/Advertisements";
 import MessagesPage from "@/pages/Messages";
 import SettingsPage from "@/pages/Settings";
 import AppointmentsPage from "@/pages/Appointments";
+import SeedPage from "@/pages/Seed";
 
 const queryClient = new QueryClient();
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -41,6 +42,7 @@ function AppRoutes() {
       <Route path="/appointments" component={AppointmentsPage} />
       <Route path="/messages" component={MessagesPage} />
       <Route path="/settings" component={SettingsPage} />
+      <Route path="/seed" component={SeedPage} />
       <Route><Redirect to="/" /></Route>
     </Switch>
   );
