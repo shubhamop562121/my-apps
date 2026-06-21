@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowLeft, Phone, Loader2, AlertCircle } from "lucide-react";
-import { useAuth, authErrorMessage } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
@@ -20,7 +20,8 @@ export default function LoginPage() {
       sessionStorage.setItem("km_phone", phone);
       setLocation("/otp");
     } catch (err) {
-      setError(authErrorMessage(err));
+      const e = err as { code?: string; message?: string };
+      setError(`${e.code ?? "(no code)"}\n${e.message ?? String(err)}`);
     } finally {
       setLoading(false);
     }
@@ -76,7 +77,7 @@ export default function LoginPage() {
         {error && (
           <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
             <AlertCircle size={16} className="text-red-500 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-red-600">{error}</p>
+            <p className="text-sm text-red-600 whitespace-pre-line break-words font-mono">{error}</p>
           </div>
         )}
 
