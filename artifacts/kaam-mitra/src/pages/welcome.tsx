@@ -75,14 +75,6 @@ export default function WelcomePage() {
             Get Started
           </button>
         </Link>
-        <Link href="/home">
-          <button
-            className="w-full text-muted-foreground py-3 text-sm font-medium"
-            data-testid="btn-skip"
-          >
-            Explore without account
-          </button>
-        </Link>
       </motion.div>
     </div>
   );

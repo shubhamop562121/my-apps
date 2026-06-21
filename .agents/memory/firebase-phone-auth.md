@@ -15,6 +15,11 @@ Real SMS delivery is blocked until the project owner does these in the Firebase 
 
 **Why:** these are server-side project settings; the code is correct but inert until they're enabled.
 
+## "Any OTP works" is usually NOT an OTP bug
+`confirmationResult.confirm(otp)` is server-validated by Firebase and rejects wrong codes — the crypto is fine. A reported "any OTP logs in / bypass login" almost always means **protected routes aren't gated on auth state**: anyone navigating by URL (or a guest "Explore without account" button linking straight to /home) enters the app without ever verifying. Fix = a route guard (`AuthGate`) that checks `onAuthStateChanged` user before rendering protected pages, plus removing guest-bypass entry points.
+- Guard race: after a correct `confirm(otp)`, navigating to the protected page can evaluate before the `user` React state propagates → false redirect to /welcome. Fall back to `auth.currentUser` (set synchronously once confirm resolves) in the guard to avoid the flash.
+- **Client route guards are NOT an authorization boundary** — Firestore Security Rules must also require auth, or data is exposed regardless of client gating.
+
 ## Code gotchas
 - Firebase v12 `RecaptchaVerifier` signature is `new RecaptchaVerifier(auth, containerIdOrEl, params)` — **auth is the FIRST arg** (changed from older v9 order). Use `{ size: "invisible" }`.
 - On `signInWithPhoneNumber` failure, call `recaptcha.clear()` and null the ref so a retry builds a fresh verifier; a stale/used verifier fails silently.
