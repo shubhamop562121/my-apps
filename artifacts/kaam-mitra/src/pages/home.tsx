@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Bell, Search, ChevronRight, Loader2, Check, X } from "lucide-react";
+import { MapPin, Bell, Search, ChevronRight, Loader2, Check, X, Navigation } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import WorkerCard from "@/components/WorkerCard";
 import CategoryIcon from "@/components/CategoryIcon";
@@ -10,6 +10,7 @@ import { useSaved } from "@/context/SavedContext";
 import { useProfile } from "@/context/ProfileContext";
 import { useAuth } from "@/context/AuthContext";
 import { useCity } from "@/context/CityContext";
+import { cityMatches } from "@/lib/geo";
 import { useWorkers } from "@/hooks/useWorkers";
 import { useCategories } from "@/hooks/useCategories";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -23,11 +24,29 @@ export default function HomePage() {
   const { workers, loading } = useWorkers();
   const { categories } = useCategories();
   const { unreadCount } = useNotifications();
-  const { cities, selectedCity, setSelectedCity } = useCity();
+  const { cities, selectedCity, setSelectedCity, detecting, detectError, detectLocation } = useCity();
   const [cityPickerOpen, setCityPickerOpen] = useState(false);
 
-  const popularWorkers = workers.slice(0, 5);
-  const recentWorkers = workers.slice(5, 9);
+  // Workers in the selected city (alias-tolerant). If the chosen city has no
+  // workers yet, fall back to showing everyone so the home page is never empty.
+  const cityWorkers = useMemo(
+    () => (selectedCity ? workers.filter((w) => cityMatches(w.city, selectedCity)) : workers),
+    [workers, selectedCity],
+  );
+  const usingAllAreas = !loading && selectedCity !== "" && cityWorkers.length === 0 && workers.length > 0;
+  const shownWorkers = cityWorkers.length > 0 ? cityWorkers : workers;
+
+  const popularWorkers = shownWorkers.slice(0, 5);
+  const recentWorkers = shownWorkers.slice(5, 9);
+
+  const handleDetect = async () => {
+    try {
+      await detectLocation();
+      setCityPickerOpen(false);
+    } catch {
+      /* error surfaced via detectError inside the picker */
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-20">
@@ -39,7 +58,9 @@ export default function HomePage() {
             data-testid="btn-city-picker"
           >
             <MapPin size={14} className="text-white/70" />
-            <span className="text-white/80 text-xs font-medium">{selectedCity}</span>
+            <span className="text-white/80 text-xs font-medium">
+              {detecting && !selectedCity ? "Detecting location…" : selectedCity || "Select city"}
+            </span>
             <ChevronRight size={12} className="text-white/60 rotate-90" />
           </button>
           <button
@@ -98,7 +119,7 @@ export default function HomePage() {
       </div>
 
       <div className="px-5 pt-7">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-1">
           <h2 className="text-base font-bold text-foreground">Popular Workers</h2>
           <button
             onClick={() => setLocation("/search")}
@@ -107,6 +128,13 @@ export default function HomePage() {
             See all <ChevronRight size={14} />
           </button>
         </div>
+        <p className="text-xs text-muted-foreground mb-4" data-testid="text-city-context">
+          {usingAllAreas
+            ? `No workers in ${selectedCity} yet — showing all areas`
+            : selectedCity
+              ? `In ${selectedCity}`
+              : ""}
+        </p>
         {loading ? (
           <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
             <Loader2 size={18} className="animate-spin" />
@@ -174,6 +202,24 @@ export default function HomePage() {
                 >
                   <X size={16} className="text-muted-foreground" />
                 </button>
+              </div>
+              <div className="px-3 pt-3">
+                <button
+                  onClick={handleDetect}
+                  disabled={detecting}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl bg-primary/10 text-primary font-semibold disabled:opacity-60"
+                  data-testid="btn-detect-location"
+                >
+                  {detecting ? (
+                    <Loader2 size={18} className="animate-spin" />
+                  ) : (
+                    <Navigation size={18} />
+                  )}
+                  <span className="text-sm">{detecting ? "Detecting your location…" : "Use my current location"}</span>
+                </button>
+                {detectError && (
+                  <p className="text-xs text-red-500 px-1 pt-2" data-testid="text-detect-error">{detectError}</p>
+                )}
               </div>
               <div className="overflow-y-auto px-3 py-2">
                 {cities.map((city) => (
