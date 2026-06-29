@@ -3,12 +3,14 @@ import { Search, Plus, Edit2, Trash2, BadgeCheck, Loader2, AlertTriangle } from 
 import Layout from "@/components/Layout";
 import Badge from "@/components/Badge";
 import { useWorkers } from "@/hooks/useWorkers";
-import type { Worker } from "@/data/mockData";
-
-const CATEGORIES = ["Plumber","Electrician","Carpenter","Painter","Mason","AC Repair","Welder","Labour","CCTV","RO Repair","Cleaning"];
+import { useCollection } from "@/hooks/useCollection";
+import type { Worker, Category } from "@/data/mockData";
 
 export default function WorkersPage() {
   const { workers, loading, error, addWorker, updateWorker, deleteWorker } = useWorkers();
+  const { items: categoryDocs } = useCollection<Category>("categories");
+  const CATEGORIES = categoryDocs.map((c) => c.name).filter(Boolean);
+  const assignableCategories = categoryDocs.filter((c) => c.status !== "inactive").map((c) => c.name).filter(Boolean);
 
   const [search, setSearch] = useState("");
   const [filterCity, setFilterCity] = useState("All");
@@ -33,7 +35,7 @@ export default function WorkersPage() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ name: "", phone: "", category: "Plumber", city: "New Delhi", experience: "1", description: "", status: "active" });
+    setForm({ name: "", phone: "", category: assignableCategories[0] ?? "", city: "New Delhi", experience: "1", description: "", status: "active" });
     setShowModal(true);
   };
 
@@ -54,6 +56,7 @@ export default function WorkersPage() {
 
   const handleSave = async () => {
     if (!form.name.trim() || !form.phone.trim()) return;
+    if (!form.category) { alert("Please select a category. Create one in the Categories page if none are available."); return; }
     setSaving(true);
     try {
       if (editing) {
@@ -178,7 +181,8 @@ export default function WorkersPage() {
                 <div><label className="text-xs font-semibold text-foreground mb-1 block">Phone</label><input className={inputCls} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+91 XXXXX XXXXX" /></div>
                 <div><label className="text-xs font-semibold text-foreground mb-1 block">Category</label>
                   <select className={inputCls} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-                    {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                    {assignableCategories.length === 0 && <option value="">No categories — create one first</option>}
+                    {assignableCategories.map((c) => <option key={c}>{c}</option>)}
                   </select>
                 </div>
                 <div><label className="text-xs font-semibold text-foreground mb-1 block">City</label><input className={inputCls} value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="City" /></div>

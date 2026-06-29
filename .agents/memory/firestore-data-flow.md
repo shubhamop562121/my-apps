@@ -77,8 +77,12 @@ in `icon`, filters out `status === "inactive"`, and falls back to the mockData d
 collection is empty. `CategoryIcon` keys its hand-drawn SVGs by `slug`; for custom categories
 not in that map it now renders the emoji (passed via an `emoji` prop). When seeding standard
 categories, name them so their derived slug matches a built-in SVG key (e.g. "AC Repair" →
-`ac-repair`). **Lesson:** any collection the admin manages must be read from Firestore by the
-app — grep the app for hardcoded `mockData` imports when a "changes don't show up" bug appears.
+`ac-repair`). **Lesson:** any collection the admin manages must be read from Firestore
+everywhere it's consumed — NOT just in the user app. The admin Workers page also had a
+hardcoded `CATEGORIES` const driving its add/edit + filter dropdowns, so new categories
+couldn't be assigned to a worker; fixed by reading `useCollection<Category>("categories")` and
+mapping names. When a "changes don't show up" bug appears, grep BOTH apps for hardcoded
+category/city/etc lists (`mockData` imports AND inline `const X = [...]` arrays in forms).
 
 **Open risk:** Security rules in `firestore.rules` are written but only take effect once the
 user deploys them in their Firebase project; until then the DB is still open/permissive.
