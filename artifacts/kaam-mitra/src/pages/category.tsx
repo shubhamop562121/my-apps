@@ -4,9 +4,9 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Search, SlidersHorizontal, Users, Loader2 } from "lucide-react";
 import WorkerCard from "@/components/WorkerCard";
 import EmptyState from "@/components/EmptyState";
-import { categories } from "@/data/mockData";
 import { useSaved } from "@/context/SavedContext";
 import { useWorkers } from "@/hooks/useWorkers";
+import { useCategories } from "@/hooks/useCategories";
 
 export default function CategoryPage() {
   const [, setLocation] = useLocation();
@@ -15,6 +15,7 @@ export default function CategoryPage() {
   const [query, setQuery] = useState("");
   const { savedIds, toggleSave } = useSaved();
   const { workers, loading } = useWorkers();
+  const { categories } = useCategories();
 
   const cat = categories.find((c) => c.slug === slug);
   const allCatWorkers = workers.filter((w) => w.category === slug);
@@ -77,7 +78,7 @@ export default function CategoryPage() {
             title={allCatWorkers.length === 0 ? "No Workers Yet" : "No Workers Found"}
             subtitle={
               allCatWorkers.length === 0
-                ? `No ${cat?.label} workers have registered in your area yet.`
+                ? `No ${cat?.label ?? "matching"} workers have registered in your area yet.`
                 : "Try adjusting your search or check back later."
             }
             ctaLabel={allCatWorkers.length === 0 ? "Explore Other Categories" : "Go Back"}

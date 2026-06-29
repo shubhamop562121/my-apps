@@ -1,6 +1,7 @@
 type Props = {
   slug: string;
   size?: number;
+  emoji?: string;
 };
 
 const categoryConfig: Record<string, { bg: string; fg: string; icon: React.ReactNode }> = {
@@ -193,8 +194,25 @@ const categoryConfig: Record<string, { bg: string; fg: string; icon: React.React
   },
 };
 
-export default function CategoryIcon({ slug, size = 32 }: Props) {
-  const config = categoryConfig[slug] ?? categoryConfig["other"];
+export default function CategoryIcon({ slug, size = 32, emoji }: Props) {
+  const builtIn = categoryConfig[slug];
+
+  if (!builtIn && emoji) {
+    return (
+      <div
+        className="rounded-2xl flex items-center justify-center"
+        style={{
+          width: size + 20,
+          height: size + 20,
+          backgroundColor: "#F3F4F6",
+        }}
+      >
+        <span style={{ fontSize: size - 2, lineHeight: 1 }}>{emoji}</span>
+      </div>
+    );
+  }
+
+  const config = builtIn ?? categoryConfig["other"];
   return (
     <div
       className="rounded-2xl flex items-center justify-center"

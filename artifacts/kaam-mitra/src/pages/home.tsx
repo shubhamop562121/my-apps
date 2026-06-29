@@ -4,14 +4,15 @@ import { MapPin, Bell, Search, ChevronRight, Loader2 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import WorkerCard from "@/components/WorkerCard";
 import CategoryIcon from "@/components/CategoryIcon";
-import { categories } from "@/data/mockData";
 import { useSaved } from "@/context/SavedContext";
 import { useWorkers } from "@/hooks/useWorkers";
+import { useCategories } from "@/hooks/useCategories";
 
 export default function HomePage() {
   const [, setLocation] = useLocation();
   const { savedIds, toggleSave } = useSaved();
   const { workers, loading } = useWorkers();
+  const { categories } = useCategories();
 
   const popularWorkers = workers.slice(0, 5);
   const recentWorkers = workers.slice(5, 9);
@@ -65,7 +66,7 @@ export default function HomePage() {
               data-testid={`cat-${cat.slug}`}
             >
               <div className="shadow-sm border border-border/40 rounded-2xl overflow-hidden">
-                <CategoryIcon slug={cat.slug} size={26} />
+                <CategoryIcon slug={cat.slug} emoji={cat.icon} size={26} />
               </div>
               <span className="text-[10px] font-medium text-muted-foreground text-center leading-tight">{cat.label}</span>
             </motion.div>

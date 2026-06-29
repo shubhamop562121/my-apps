@@ -18,7 +18,7 @@ export function useWorkers() {
             id: d.id,
             name: (raw.name as string) ?? "",
             profession: (raw.profession as string) ?? (raw.category as string) ?? "",
-            category: ((raw.category as string) ?? "").toLowerCase().replace(/\s+/g, "-"),
+            category: ((raw.category as string) ?? "").trim().toLowerCase().replace(/\s+/g, "-"),
             city: (raw.city as string) ?? "",
             experience: Number(raw.experience ?? 0),
             verified: Boolean(raw.verified ?? false),

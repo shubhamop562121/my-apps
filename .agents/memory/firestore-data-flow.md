@@ -66,5 +66,19 @@ run in Replit (no Android SDK); see `KaamMitra-Deployment-Guide.md`. Phone/OTP a
 reCAPTCHA which fails in Android WebView — needs `@capacitor-firebase/authentication` native
 plugin or SHA fingerprints for production.
 
+**Categories: admin vs app shape mismatch (was a real bug).** The admin panel and kaam-mitra
+app store/expect DIFFERENT category shapes. Admin writes `{ name, icon (emoji), status, workerCount }`;
+the app expects `{ slug, label, icon, color }`. The app originally read categories from a
+HARDCODED `@/data/mockData.ts` array, so admin-added categories never appeared. Fix:
+`useCategories` hook reads the Firestore `categories` collection, deriving `slug =
+name.toLowerCase().trim().replace(/\s+/g,'-')` (same derivation as `useWorkers` does for
+`worker.category`, so worker↔category matching by slug works), `label = name`, keeps the emoji
+in `icon`, filters out `status === "inactive"`, and falls back to the mockData defaults when the
+collection is empty. `CategoryIcon` keys its hand-drawn SVGs by `slug`; for custom categories
+not in that map it now renders the emoji (passed via an `emoji` prop). When seeding standard
+categories, name them so their derived slug matches a built-in SVG key (e.g. "AC Repair" →
+`ac-repair`). **Lesson:** any collection the admin manages must be read from Firestore by the
+app — grep the app for hardcoded `mockData` imports when a "changes don't show up" bug appears.
+
 **Open risk:** Security rules in `firestore.rules` are written but only take effect once the
 user deploys them in their Firebase project; until then the DB is still open/permissive.
