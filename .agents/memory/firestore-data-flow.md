@@ -144,3 +144,19 @@ appointment. Same applies to reject-note state.
 Assignment writes `assignedWorkerName` + `assignedWorkerId` via `updateAppointment`;
 the details panel re-derives the assigned worker's city/phone by looking up
 `assignedWorkerId` in the live workers list (not stored on the appointment).
+
+## Reviews moderation policy + verified flow
+
+Reviews use **post-moderation**: the user app writes new reviews with
+`status:"approved"` so they appear on the worker profile immediately
+(`useReviews` only renders approved). Admins remove abusive ones from the admin
+Reviews page (update/delete). `firestore.rules` reviews block allows signed-in
+`create` (validates rating 1-5 + status=="approved"), admin-only update/delete.
+
+**Gotcha:** `firestore.rules` is NOT auto-deployed — it must be published manually
+(Firebase console → Firestore → Rules, or `firebase deploy --only firestore:rules`).
+Any rule change here (e.g. allowing user review creation) is inert until published.
+
+Worker `verified` is set by the admin via a "Mark as verified" checkbox in the
+Add/Edit Worker modal (admin Workers page) → drives the Verified badge in the
+admin table and the main app worker profile. Default false on new workers.

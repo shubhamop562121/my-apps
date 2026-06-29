@@ -37,11 +37,19 @@ service cloud.firestore {
     match /cities/{id}         { allow read: if true; allow write: if isAdmin(); }
     match /advertisements/{id} { allow read: if true; allow write: if isAdmin(); }
 
-    // Reviews: public read; admins manage. (App can be extended to let signed-in
-    // users create their own reviews by adding an `allow create` rule.)
+    // Reviews: public read. Signed-in users may create a review (validated
+    // shape, rating 1-5, status forced to "approved" so it shows immediately).
+    // Only admins can edit or delete, so they can still remove abusive reviews.
     match /reviews/{id} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isSignedIn()
+        && request.resource.data.status == "approved"
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.workerId is string
+        && request.resource.data.comment is string;
+      allow update, delete: if isAdmin();
     }
 
     // User profiles: a user may read/write their own doc (id == uid); admins read all.

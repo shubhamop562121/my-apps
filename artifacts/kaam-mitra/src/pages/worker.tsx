@@ -225,7 +225,7 @@ export default function WorkerDetailPage() {
           {submitted && (
             <div className="mb-3 bg-green-50 border border-green-200 rounded-2xl p-3 flex items-center gap-2">
               <CheckCircle2 size={16} className="text-green-600 flex-shrink-0" />
-              <p className="text-xs text-green-700">Thanks! Your review was submitted and will appear once approved.</p>
+              <p className="text-xs text-green-700">Thanks! Your review is now live on this worker's profile.</p>
             </div>
           )}
 

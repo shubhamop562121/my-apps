@@ -21,6 +21,7 @@ export default function WorkersPage() {
   const [form, setForm] = useState({
     name: "", phone: "", category: "Plumber", city: "New Delhi",
     experience: "1", description: "", status: "active" as "active" | "inactive",
+    verified: false,
   });
 
   const cities = ["All", ...Array.from(new Set(workers.map((w) => w.city))).sort()];
@@ -35,13 +36,13 @@ export default function WorkersPage() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ name: "", phone: "", category: assignableCategories[0] ?? "", city: "New Delhi", experience: "1", description: "", status: "active" });
+    setForm({ name: "", phone: "", category: assignableCategories[0] ?? "", city: "New Delhi", experience: "1", description: "", status: "active", verified: false });
     setShowModal(true);
   };
 
   const openEdit = (w: Worker) => {
     setEditing(w);
-    setForm({ name: w.name, phone: w.phone, category: w.category, city: w.city, experience: String(w.experience), description: w.description, status: w.status });
+    setForm({ name: w.name, phone: w.phone, category: w.category, city: w.city, experience: String(w.experience), description: w.description, status: w.status, verified: w.verified });
     setShowModal(true);
   };
 
@@ -194,6 +195,19 @@ export default function WorkersPage() {
                   </select>
                 </div>
               </div>
+              <label className="flex items-center gap-2.5 cursor-pointer rounded-xl border border-border bg-background px-3 py-2.5">
+                <input
+                  type="checkbox"
+                  checked={form.verified}
+                  onChange={(e) => setForm({ ...form, verified: e.target.checked })}
+                  className="w-4 h-4 rounded accent-primary"
+                  data-testid="checkbox-verified"
+                />
+                <span className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                  <BadgeCheck size={15} className="text-primary" /> Mark as verified
+                </span>
+                <span className="text-xs text-muted-foreground ml-auto">Shows a verified badge on the worker's profile</span>
+              </label>
               <div><label className="text-xs font-semibold text-foreground mb-1 block">Description</label><textarea className={inputCls} rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Brief description…" /></div>
             </div>
             <div className="flex gap-3 px-6 pb-6">

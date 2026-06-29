@@ -6,7 +6,7 @@ import {
 import { db } from "@/lib/firebase";
 import type { Worker } from "@/data/mockData";
 
-export type WorkerInput = Omit<Worker, "id" | "rating" | "reviewCount" | "verified" | "joinedAt">;
+export type WorkerInput = Omit<Worker, "id" | "rating" | "reviewCount" | "joinedAt">;
 
 export function useWorkers() {
   const [workers, setWorkers] = useState<Worker[]>([]);
@@ -59,7 +59,7 @@ export function useWorkers() {
       status: input.status,
       rating: 4.0,
       reviewCount: 0,
-      verified: false,
+      verified: input.verified ?? false,
       joinedAt: new Date().toISOString().split("T")[0],
       createdAt: serverTimestamp(),
     });

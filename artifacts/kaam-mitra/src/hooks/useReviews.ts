@@ -91,7 +91,9 @@ export async function addReview(input: {
     userName,
     rating,
     comment,
-    status: "pending",
+    // Reviews are published immediately so they appear on the worker's profile
+    // right away; admins can still remove abusive ones from the Reviews page.
+    status: "approved",
     createdAt: serverTimestamp(),
   });
 }
