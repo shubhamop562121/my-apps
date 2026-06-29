@@ -7,6 +7,8 @@ import WorkerCard from "@/components/WorkerCard";
 import CategoryIcon from "@/components/CategoryIcon";
 import AdBanner from "@/components/AdBanner";
 import { useSaved } from "@/context/SavedContext";
+import { useProfile } from "@/context/ProfileContext";
+import { useAuth } from "@/context/AuthContext";
 import { useCity } from "@/context/CityContext";
 import { useWorkers } from "@/hooks/useWorkers";
 import { useCategories } from "@/hooks/useCategories";
@@ -15,6 +17,9 @@ import { useNotifications } from "@/hooks/useNotifications";
 export default function HomePage() {
   const [, setLocation] = useLocation();
   const { savedIds, toggleSave } = useSaved();
+  const { name: profileName } = useProfile();
+  const { user } = useAuth();
+  const displayName = profileName || user?.displayName || "KaamMitra User";
   const { workers, loading } = useWorkers();
   const { categories } = useCategories();
   const { unreadCount } = useNotifications();
@@ -52,7 +57,7 @@ export default function HomePage() {
         </div>
         <div>
           <p className="text-white/70 text-sm">Good Morning,</p>
-          <h1 className="text-white text-2xl font-bold">Rahul Sharma</h1>
+          <h1 className="text-white text-2xl font-bold" data-testid="text-greeting-name">{displayName}</h1>
         </div>
 
         <div
