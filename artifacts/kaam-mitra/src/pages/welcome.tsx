@@ -1,6 +1,8 @@
-import { Link } from "wouter";
+import { Link, Redirect } from "wouter";
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { auth } from "@/lib/firebase";
 
 const features = [
   "Find verified local workers instantly",
@@ -9,6 +11,11 @@ const features = [
 ];
 
 export default function WelcomePage() {
+  const { user, loading } = useAuth();
+
+  // Already signed in? Skip the login flow entirely.
+  if (!loading && (user || auth.currentUser)) return <Redirect to="/home" />;
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <div className="flex-1 flex flex-col items-center justify-center px-6 pt-16 pb-8">

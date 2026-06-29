@@ -1,14 +1,23 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
+import { auth } from "@/lib/firebase";
 
 export default function SplashPage() {
   const [, setLocation] = useLocation();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    const timer = setTimeout(() => setLocation("/welcome"), 2400);
+    // Wait until Firebase has restored any saved session before deciding where
+    // to go — a signed-in user goes straight to Home, never the login flow.
+    if (loading) return;
+    const timer = setTimeout(() => {
+      const signedIn = user ?? auth.currentUser;
+      setLocation(signedIn ? "/home" : "/welcome", { replace: true });
+    }, 2000);
     return () => clearTimeout(timer);
-  }, [setLocation]);
+  }, [loading, user, setLocation]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-primary gap-6 relative overflow-hidden">

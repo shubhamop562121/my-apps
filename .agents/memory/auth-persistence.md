@@ -8,6 +8,11 @@ description: How "stay logged in per device" and admin forgot-password work acro
 - **Effect:** Firebase keeps the session across refresh/browser-restart until explicit logout or cleared storage. This already satisfies "log in once per device, never ask again" — no extra code needed.
 - **Why:** browserLocalPersistence is the correct Firebase web mechanism; sessionPersistence/inMemory would re-prompt.
 
+# Gotcha: persistence ≠ no re-login — routing must be auth-aware too
+- Symptom: "still asks for login on refresh" even though persistence works. Cause was the **splash page** (`kaam-mitra/src/pages/splash.tsx`) unconditionally redirecting `/splash` → `/welcome` after a timer, ignoring the restored session.
+- Fix pattern: splash must wait for `useAuth().loading` to resolve, then route signed-in users to `/home` and others to `/welcome` (use `replace`). Public auth screens (welcome/login/otp) also `Redirect` to `/home` when `user || auth.currentUser` (guard placed AFTER all hooks).
+- **Rule:** whenever persistence is requested, audit the entry/splash route + public auth pages — the redirect logic, not persistence, is the usual culprit.
+
 # Admin guard must not sign out on transient errors
 - Admin access = a doc exists at `admins/{lowercased-email}` (allowlist). `isAuthorizedAdmin` returns false (resolved) for "not admin" but THROWS for network/rules read failures.
 - `onAuthStateChanged` catch block must NOT `signOut` on a thrown (transient) error — that forces a valid admin to re-login after a blip, defeating persistence. It now keeps the session (`setAdmin(prev=>prev)`), and `isAuthorizedAdmin` retries 3x with backoff.

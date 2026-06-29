@@ -1,15 +1,19 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Redirect } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowLeft, Phone, Loader2, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { auth } from "@/lib/firebase";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
-  const { sendOTP } = useAuth();
+  const { sendOTP, user, loading: authLoading } = useAuth();
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Already signed in? Don't show the login screen.
+  if (!authLoading && (user || auth.currentUser)) return <Redirect to="/home" />;
 
   const handleSendOtp = async () => {
     if (phone.length < 10 || loading) return;

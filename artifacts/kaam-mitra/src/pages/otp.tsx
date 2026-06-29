@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Redirect } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowLeft, Shield, Loader2, AlertCircle } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { useAuth, authErrorMessage } from "@/context/AuthContext";
+import { auth } from "@/lib/firebase";
 
 export default function OtpPage() {
   const [, setLocation] = useLocation();
-  const { sendOTP, verifyOTP, otpSent } = useAuth();
+  const { sendOTP, verifyOTP, otpSent, user, loading: authLoading } = useAuth();
   const [otp, setOtp] = useState("");
   const [countdown, setCountdown] = useState(30);
   const [loading, setLoading] = useState(false);
@@ -21,6 +22,9 @@ export default function OtpPage() {
     const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
     return () => clearTimeout(t);
   }, [countdown]);
+
+  // Already verified / signed in? Go straight to Home.
+  if (!authLoading && (user || auth.currentUser)) return <Redirect to="/home" />;
 
   const handleVerify = async () => {
     if (loading) return;
