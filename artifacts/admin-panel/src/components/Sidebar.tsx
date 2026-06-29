@@ -45,8 +45,8 @@ export default function Sidebar({ open, onClose }: { open: boolean; onClose: () 
         style={{ backgroundColor: "hsl(var(--sidebar))" }}
       >
         <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10">
-          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-xs font-bold">KM</span>
+          <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 bg-white">
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="KaamMitra" className="w-full h-full object-contain" />
           </div>
           <div>
             <p className="text-white font-bold text-sm leading-tight">KaamMitra</p>
