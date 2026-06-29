@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ElementType, type ReactNode } from "react";
 import { Save, Globe, Bell, Shield, Database, Phone, Mail, CheckCircle2, KeyRound, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/context/AuthContext";
@@ -6,6 +6,8 @@ import { auth } from "@/lib/firebase";
 import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
 
 const STORAGE_KEY = "km_contact_settings";
+
+const inputCls = "w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary";
 
 function loadContactSettings() {
   try {
@@ -15,8 +17,66 @@ function loadContactSettings() {
   return { supportEmail: "support@kaammitra.in", supportPhone: "+91 88000 00000", supportHours: "Mon–Sat, 9am–6pm" };
 }
 
+// NOTE: these sub-components are defined at module scope (not inside SettingsPage)
+// on purpose. Defining them inside the component recreates their identity on every
+// render, which makes React remount the inputs and drop focus after each keystroke.
+function ToggleRow({ label, value, onChange, desc }: { label: string; value: boolean; onChange: (v: boolean) => void; desc?: string }) {
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-border last:border-0">
+      <div>
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        {desc && <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>}
+      </div>
+      <button
+        onClick={() => onChange(!value)}
+        className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 ${value ? "bg-primary" : "bg-border"}`}
+      >
+        <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${value ? "translate-x-5" : "translate-x-0.5"}`} />
+      </button>
+    </div>
+  );
+}
+
+function Section({ icon: Icon, title, children }: { icon: ElementType; title: string; children: ReactNode }) {
+  return (
+    <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+      <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
+        <Icon size={16} className="text-primary" />
+        <h2 className="font-semibold text-foreground text-sm">{title}</h2>
+      </div>
+      <div className="p-5">{children}</div>
+    </div>
+  );
+}
+
+function PasswordField({
+  label, value, onChange, show, onToggle, placeholder,
+}: { label: string; value: string; onChange: (v: string) => void; show: boolean; onToggle: () => void; placeholder?: string }) {
+  return (
+    <div>
+      <label className="text-xs font-semibold mb-1.5 block">{label}</label>
+      <div className="relative">
+        <input
+          type={show ? "text" : "password"}
+          className={inputCls + " pr-10"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder ?? "••••••••"}
+        />
+        <button
+          type="button"
+          onClick={onToggle}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+        >
+          {show ? <EyeOff size={15} /> : <Eye size={15} />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
-  const { logout, admin } = useAuth();
+  const { admin } = useAuth();
   const initial = loadContactSettings();
 
   const [saved, setSaved] = useState(false);
@@ -42,8 +102,6 @@ export default function SettingsPage() {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-
-  const inputCls = "w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary";
 
   const handleSave = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ supportEmail, supportPhone, supportHours }));
@@ -87,10 +145,8 @@ export default function SettingsPage() {
       setNewPassword("");
       setConfirmPassword("");
       setCredSaved(true);
-      setTimeout(() => {
-        setCredSaved(false);
-        logout();
-      }, 1500);
+      // Keep the admin signed in — just confirm success and clear the banner.
+      setTimeout(() => setCredSaved(false), 3000);
     } catch (err) {
       console.error("[AdminAuth] password change failed:", err);
       const code = (err as { code?: string })?.code ?? "";
@@ -108,62 +164,13 @@ export default function SettingsPage() {
     }
   };
 
-  const ToggleRow = ({ label, value, onChange, desc }: { label: string; value: boolean; onChange: (v: boolean) => void; desc?: string }) => (
-    <div className="flex items-center justify-between py-3 border-b border-border last:border-0">
-      <div>
-        <p className="text-sm font-medium text-foreground">{label}</p>
-        {desc && <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>}
-      </div>
-      <button
-        onClick={() => onChange(!value)}
-        className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 ${value ? "bg-primary" : "bg-border"}`}
-      >
-        <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${value ? "translate-x-5" : "translate-x-0.5"}`} />
-      </button>
-    </div>
-  );
-
-  const Section = ({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) => (
-    <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-      <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
-        <Icon size={16} className="text-primary" />
-        <h2 className="font-semibold text-foreground text-sm">{title}</h2>
-      </div>
-      <div className="p-5">{children}</div>
-    </div>
-  );
-
-  const PasswordField = ({
-    label, value, onChange, show, onToggle, placeholder,
-  }: { label: string; value: string; onChange: (v: string) => void; show: boolean; onToggle: () => void; placeholder?: string }) => (
-    <div>
-      <label className="text-xs font-semibold mb-1.5 block">{label}</label>
-      <div className="relative">
-        <input
-          type={show ? "text" : "password"}
-          className={inputCls + " pr-10"}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder ?? "••••••••"}
-        />
-        <button
-          type="button"
-          onClick={onToggle}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-        >
-          {show ? <EyeOff size={15} /> : <Eye size={15} />}
-        </button>
-      </div>
-    </div>
-  );
-
   return (
     <Layout title="Settings">
       <div className="max-w-2xl space-y-6">
 
         <Section icon={KeyRound} title="Admin Login Credentials">
           <p className="text-xs text-muted-foreground mb-4">
-            Change the password used to log in to this admin panel. You'll be logged out after saving so you can sign in with the new password.
+            Change the password used to log in to this admin panel. You'll stay signed in — your new password takes effect right away for the next sign-in.
           </p>
           <div className="grid grid-cols-1 gap-4">
             <div>
@@ -218,7 +225,7 @@ export default function SettingsPage() {
             {credSaved && (
               <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2.5">
                 <CheckCircle2 size={14} className="text-green-600 flex-shrink-0" />
-                <p className="text-xs text-green-700 font-medium">Credentials updated! Logging you out…</p>
+                <p className="text-xs text-green-700 font-medium">Password updated successfully. You're still signed in.</p>
               </div>
             )}
 
