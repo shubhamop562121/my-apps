@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/context/AuthContext";
+import { useProfile } from "@/context/ProfileContext";
 import { loadAddress, shortLocation } from "@/lib/address";
 
 const menuItems = [
@@ -18,9 +19,10 @@ const menuItems = [
 export default function ProfilePage() {
   const [, setLocation] = useLocation();
   const { user, logout } = useAuth();
+  const { name: profileName, photoURL } = useProfile();
 
   const phoneNumber = user?.phoneNumber ?? "+91 98765 43210";
-  const displayName = user?.displayName ?? "KaamMitra User";
+  const displayName = profileName || user?.displayName || "KaamMitra User";
   const location = shortLocation(loadAddress()) || "Add your address";
   const initials = displayName
     .split(" ")
@@ -44,7 +46,7 @@ export default function ProfilePage() {
         <div className="flex items-start justify-between mb-4">
           <h1 className="text-xl font-bold text-white">Profile</h1>
           <button
-            onClick={() => setLocation("/edit-address")}
+            onClick={() => setLocation("/edit-profile")}
             className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center"
             data-testid="btn-edit-profile"
           >
@@ -52,9 +54,17 @@ export default function ProfilePage() {
           </button>
         </div>
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-white text-2xl font-bold">
-            {initials}
-          </div>
+          <button
+            onClick={() => setLocation("/edit-profile")}
+            className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-white text-2xl font-bold overflow-hidden flex-shrink-0"
+            data-testid="btn-avatar"
+          >
+            {photoURL ? (
+              <img src={photoURL} alt={displayName} className="w-full h-full object-cover" />
+            ) : (
+              initials
+            )}
+          </button>
           <div className="flex-1 min-w-0">
             <h2 className="text-white text-lg font-bold">{displayName}</h2>
             <div className="flex items-center gap-1.5 mt-0.5">

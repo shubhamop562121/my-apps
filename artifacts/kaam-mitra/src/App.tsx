@@ -7,6 +7,7 @@ import MobileFrame from "@/components/MobileFrame";
 import { SavedProvider } from "@/context/SavedContext";
 import { AppointmentsProvider } from "@/context/AppointmentsContext";
 import { CityProvider } from "@/context/CityContext";
+import { ProfileProvider } from "@/context/ProfileContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { auth } from "@/lib/firebase";
 import SplashPage from "@/pages/splash";
@@ -27,6 +28,7 @@ import FiltersPage from "@/pages/filters";
 import AboutPage from "@/pages/about";
 import HelpPage from "@/pages/help";
 import EditAddressPage from "@/pages/edit-address";
+import EditProfilePage from "@/pages/edit-profile";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -75,6 +77,7 @@ const GuardedFilters = withAuth(FiltersPage);
 const GuardedAbout = withAuth(AboutPage);
 const GuardedHelp = withAuth(HelpPage);
 const GuardedEditAddress = withAuth(EditAddressPage);
+const GuardedEditProfile = withAuth(EditProfilePage);
 
 function Router() {
   return (
@@ -103,6 +106,7 @@ function Router() {
         <Route path="/about" component={GuardedAbout} />
         <Route path="/help" component={GuardedHelp} />
         <Route path="/edit-address" component={GuardedEditAddress} />
+        <Route path="/edit-profile" component={GuardedEditProfile} />
         <Route component={NotFound} />
       </Switch>
     </MobileFrame>
@@ -114,15 +118,17 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
-          <CityProvider>
-            <AppointmentsProvider>
-              <SavedProvider>
-                <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-                  <Router />
-                </WouterRouter>
-              </SavedProvider>
-            </AppointmentsProvider>
-          </CityProvider>
+          <ProfileProvider>
+            <CityProvider>
+              <AppointmentsProvider>
+                <SavedProvider>
+                  <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                    <Router />
+                  </WouterRouter>
+                </SavedProvider>
+              </AppointmentsProvider>
+            </CityProvider>
+          </ProfileProvider>
         </AuthProvider>
         <Toaster />
       </TooltipProvider>
