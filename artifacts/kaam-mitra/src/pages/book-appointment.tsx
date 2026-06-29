@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, CalendarDays, Clock, MapPin, User, Phone, FileText, CheckCircle2, Loader2 } from "lucide-react";
 import { useWorkers } from "@/hooks/useWorkers";
 import { useAppointments } from "@/context/AppointmentsContext";
+import { loadAddress, formatAddress } from "@/lib/address";
 
 const timeSlots = ["8:00 AM","9:00 AM","10:00 AM","11:00 AM","12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM","6:00 PM"];
 
@@ -19,7 +20,7 @@ export default function BookAppointmentPage() {
   const [form, setForm] = useState({
     userName: "",
     userPhone: "",
-    address: "",
+    address: formatAddress(loadAddress()),
     description: "",
     preferredDate: today,
     preferredTime: "10:00 AM",

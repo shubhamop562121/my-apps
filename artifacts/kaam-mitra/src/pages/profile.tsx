@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/context/AuthContext";
+import { loadAddress, shortLocation } from "@/lib/address";
 
 const menuItems = [
   { icon: Bookmark, label: "Saved Workers", href: "/saved", color: "text-primary" },
@@ -20,6 +21,7 @@ export default function ProfilePage() {
 
   const phoneNumber = user?.phoneNumber ?? "+91 98765 43210";
   const displayName = user?.displayName ?? "KaamMitra User";
+  const location = shortLocation(loadAddress()) || "Add your address";
   const initials = displayName
     .split(" ")
     .map((n) => n[0])
@@ -65,7 +67,7 @@ export default function ProfilePage() {
               data-testid="btn-edit-address"
             >
               <MapPin size={12} className="text-white/70" />
-              <span className="text-white/70 text-xs group-hover:text-white transition-colors">New Delhi</span>
+              <span className="text-white/70 text-xs group-hover:text-white transition-colors" data-testid="text-profile-location">{location}</span>
               <PenLine size={10} className="text-white/50 group-hover:text-white/80 transition-colors" />
             </button>
           </div>

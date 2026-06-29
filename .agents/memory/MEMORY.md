@@ -1,3 +1,4 @@
 - [Firebase Phone OTP auth](firebase-phone-auth.md) — phone login needs Console actions (enable Phone, add authorized domain); RecaptchaVerifier v12 takes auth as first arg.
 - [Firestore data flow](firestore-data-flow.md) — user app & admin share no code; integration is Firestore collections (write in app via addDoc, read in admin via onSnapshot, align fields by hand).
 - [Auth persistence & reset](auth-persistence.md) — both apps use browserLocalPersistence (stay signed in per device); admin reset = sendPasswordResetEmail; don't signOut on transient allowlist read errors.
+- [Live address (India-wide)](live-address.md) — addresses are PIN-driven via free India Post API + localStorage (km_address), not a city list; gate Save on resolvedPin to avoid stale location.
