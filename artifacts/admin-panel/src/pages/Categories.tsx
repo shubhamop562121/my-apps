@@ -5,6 +5,8 @@ import Badge from "@/components/Badge";
 import { Category } from "@/data/mockData";
 import { useCollection } from "@/hooks/useCollection";
 
+const ICON_PRESETS = ["🔧","⚡","🪚","🧱","🎨","❄️","🔥","👷","📹","💧","✨","🚰","🔨","🛠️","🧹","🪛","🪜","🧰","🚿","🪠","💡","📺","🚗","🌿","🐜","🔩","🏠","🪟"];
+
 export default function CategoriesPage() {
   const { items: cats, loading, error, add, update, remove } = useCollection<Category>("categories");
   const [showModal, setShowModal] = useState(false);
@@ -23,9 +25,10 @@ export default function CategoriesPage() {
   const handleSave = async () => {
     if (!form.name) return;
     setSaving(true);
+    const clean = { ...form, name: form.name.trim(), icon: form.icon.trim() };
     try {
-      if (editing) await update(editing.id, form);
-      else await add({ ...form, workerCount: 0 });
+      if (editing) await update(editing.id, clean);
+      else await add({ ...clean, workerCount: 0 });
       setShowModal(false);
     } catch (err) {
       alert(`Failed to save category: ${(err as Error).message}`);
@@ -79,7 +82,25 @@ export default function CategoriesPage() {
             </div>
             <div className="p-6 flex flex-col gap-4">
               <div><label className="text-xs font-semibold mb-1 block">Category Name</label><input className={inputCls} value={form.name} onChange={(e) => setForm({...form,name:e.target.value})} placeholder="e.g. Plumber" /></div>
-              <div><label className="text-xs font-semibold mb-1 block">Icon (Emoji)</label><input className={inputCls} value={form.icon} onChange={(e) => setForm({...form,icon:e.target.value})} /></div>
+              <div>
+                <label className="text-xs font-semibold mb-1 block">Icon</label>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl flex-shrink-0">{form.icon || "❓"}</div>
+                  <input className={inputCls} value={form.icon} onChange={(e) => setForm({...form,icon:e.target.value})} placeholder="Pick below or type/paste an emoji" />
+                </div>
+                <div className="grid grid-cols-9 gap-1.5">
+                  {ICON_PRESETS.map((em) => (
+                    <button
+                      key={em}
+                      type="button"
+                      onClick={() => setForm({...form, icon: em})}
+                      className={`w-9 h-9 rounded-lg text-xl flex items-center justify-center transition hover:bg-blue-50 ${form.icon === em ? "bg-blue-100 ring-2 ring-primary" : "bg-muted"}`}
+                    >
+                      {em}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div><label className="text-xs font-semibold mb-1 block">Status</label><select className={inputCls} value={form.status} onChange={(e) => setForm({...form,status:e.target.value as "active"|"inactive"})}><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
             </div>
             <div className="flex gap-3 px-6 pb-6">

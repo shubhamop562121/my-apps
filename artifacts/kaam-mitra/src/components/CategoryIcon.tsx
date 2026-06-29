@@ -195,9 +195,9 @@ const categoryConfig: Record<string, { bg: string; fg: string; icon: React.React
 };
 
 export default function CategoryIcon({ slug, size = 32, emoji }: Props) {
-  const builtIn = categoryConfig[slug];
-
-  if (!builtIn && emoji) {
+  // The admin-set emoji is the source of truth: if a category has an emoji,
+  // always render it so icon changes in the admin panel reflect in the app.
+  if (emoji && emoji.trim()) {
     return (
       <div
         className="rounded-2xl flex items-center justify-center"
@@ -212,7 +212,7 @@ export default function CategoryIcon({ slug, size = 32, emoji }: Props) {
     );
   }
 
-  const config = builtIn ?? categoryConfig["other"];
+  const config = categoryConfig[slug] ?? categoryConfig["other"];
   return (
     <div
       className="rounded-2xl flex items-center justify-center"

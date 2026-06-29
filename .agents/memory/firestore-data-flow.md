@@ -84,5 +84,12 @@ couldn't be assigned to a worker; fixed by reading `useCollection<Category>("cat
 mapping names. When a "changes don't show up" bug appears, grep BOTH apps for hardcoded
 category/city/etc lists (`mockData` imports AND inline `const X = [...]` arrays in forms).
 
+**Category icons = admin emoji is source of truth.** Categories store an emoji in `icon`
+(admin Categories page has an emoji preset picker + text input). The app's `CategoryIcon` now
+renders the emoji FIRST whenever one is present, and only falls back to its built-in hand-drawn
+SVG (keyed by slug) when `icon` is empty. **Why:** previously the SVG won over the emoji for
+slugs matching a built-in (plumber/electrician/…), so admin icon edits silently did nothing in
+the app. So: to let admins fully control icons, emoji must take priority over the SVG.
+
 **Open risk:** Security rules in `firestore.rules` are written but only take effect once the
 user deploys them in their Firebase project; until then the DB is still open/permissive.
