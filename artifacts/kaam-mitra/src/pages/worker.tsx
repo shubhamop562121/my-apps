@@ -1,17 +1,33 @@
+import { useState } from "react";
 import { useLocation, useRoute } from "wouter";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, MapPin, Star, BadgeCheck,
   Bookmark, Briefcase, Shield, CalendarDays, Loader2,
+  MessageSquarePlus, Send, CheckCircle2,
 } from "lucide-react";
 import { useWorkers } from "@/hooks/useWorkers";
 import { useSaved } from "@/context/SavedContext";
+import { useAuth } from "@/context/AuthContext";
+import { useReviews, addReview } from "@/hooks/useReviews";
+import { formatDate } from "@/lib/formatDate";
+import AdBanner from "@/components/AdBanner";
 
 export default function WorkerDetailPage() {
   const [, setLocation] = useLocation();
   const [, params] = useRoute("/worker/:id");
   const { workers, loading } = useWorkers();
   const { isSaved, toggleSave } = useSaved();
+  const { user } = useAuth();
+  const { reviews } = useReviews(params?.id);
+
+  const [showForm, setShowForm] = useState(false);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [reviewerName, setReviewerName] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [reviewError, setReviewError] = useState("");
 
   const worker = workers.find((w) => w.id === params?.id);
 
@@ -37,6 +53,40 @@ export default function WorkerDetailPage() {
   const initials = worker.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
   const bgColors = ["bg-orange-100 text-orange-700", "bg-blue-100 text-blue-700", "bg-amber-100 text-amber-700", "bg-purple-100 text-purple-700", "bg-rose-100 text-rose-700"];
   const colorClass = bgColors[worker.id.charCodeAt(worker.id.length - 1) % bgColors.length];
+
+  const avgRating = reviews.length
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : worker.rating;
+  const reviewCount = reviews.length || worker.reviewCount;
+
+  const handleSubmitReview = async () => {
+    const name = reviewerName.trim() || user?.displayName || user?.phoneNumber || "KaamMitra User";
+    if (!comment.trim()) {
+      setReviewError("Please write a short comment.");
+      return;
+    }
+    setSubmitting(true);
+    setReviewError("");
+    try {
+      await addReview({
+        workerId: worker.id,
+        workerName: worker.name,
+        userName: name,
+        rating,
+        comment: comment.trim(),
+      });
+      setSubmitted(true);
+      setShowForm(false);
+      setComment("");
+      setReviewerName("");
+      setRating(5);
+    } catch (err) {
+      console.error("addReview failed:", err);
+      setReviewError("Could not submit your review. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -87,8 +137,8 @@ export default function WorkerDetailPage() {
                 </div>
                 <div className="flex items-center gap-1">
                   <Star size={12} className="text-amber-400 fill-amber-400" />
-                  <span className="text-xs font-semibold text-foreground">{worker.rating}</span>
-                  <span className="text-xs text-muted-foreground">({worker.reviewCount} reviews)</span>
+                  <span className="text-xs font-semibold text-foreground">{avgRating}</span>
+                  <span className="text-xs text-muted-foreground">({reviewCount} reviews)</span>
                 </div>
               </div>
             </div>
@@ -149,6 +199,117 @@ export default function WorkerDetailPage() {
             </div>
           </motion.div>
         )}
+
+        <AdBanner position="Worker Detail" className="mt-4" />
+
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.18 }}
+          className="mt-4 bg-white rounded-3xl shadow-sm border border-border p-5"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-bold text-sm text-foreground">
+              Reviews {reviews.length > 0 && <span className="text-muted-foreground font-normal">({reviews.length})</span>}
+            </h2>
+            <button
+              onClick={() => { setShowForm((s) => !s); setSubmitted(false); setReviewError(""); }}
+              className="flex items-center gap-1 text-xs font-semibold text-primary"
+              data-testid="btn-write-review"
+            >
+              <MessageSquarePlus size={14} />
+              Write a review
+            </button>
+          </div>
+
+          {submitted && (
+            <div className="mb-3 bg-green-50 border border-green-200 rounded-2xl p-3 flex items-center gap-2">
+              <CheckCircle2 size={16} className="text-green-600 flex-shrink-0" />
+              <p className="text-xs text-green-700">Thanks! Your review was submitted and will appear once approved.</p>
+            </div>
+          )}
+
+          {showForm && (
+            <div className="mb-4 bg-muted rounded-2xl p-4 flex flex-col gap-3">
+              <div>
+                <label className="text-xs font-semibold text-foreground mb-1.5 block">Your Rating</label>
+                <div className="flex items-center gap-1.5">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => setRating(n)}
+                      data-testid={`star-${n}`}
+                      aria-label={`Rate ${n} star${n > 1 ? "s" : ""}`}
+                    >
+                      <Star
+                        size={24}
+                        className={n <= rating ? "text-amber-400 fill-amber-400" : "text-muted-foreground/40"}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-foreground mb-1.5 block">Your Name (optional)</label>
+                <input
+                  value={reviewerName}
+                  onChange={(e) => setReviewerName(e.target.value)}
+                  placeholder="How should we show your name?"
+                  className="w-full bg-white border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  data-testid="input-reviewer-name"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-foreground mb-1.5 block">Your Review</label>
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Share your experience with this worker…"
+                  rows={3}
+                  className="w-full bg-white border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  data-testid="input-review-comment"
+                />
+              </div>
+              {reviewError && <p className="text-xs text-destructive">{reviewError}</p>}
+              <button
+                onClick={handleSubmitReview}
+                disabled={submitting}
+                className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl font-semibold text-sm disabled:opacity-60"
+                data-testid="btn-submit-review"
+              >
+                {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                {submitting ? "Submitting…" : "Submit Review"}
+              </button>
+            </div>
+          )}
+
+          {reviews.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-2">No reviews yet. Be the first to review!</p>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {reviews.map((r) => (
+                <div key={r.id} className="border-b border-border last:border-0 pb-3 last:pb-0">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-foreground">{r.userName}</span>
+                    <div className="flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <Star
+                          key={n}
+                          size={12}
+                          className={n <= r.rating ? "text-amber-400 fill-amber-400" : "text-muted-foreground/30"}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{r.comment}</p>
+                  {formatDate(r.createdAt) && (
+                    <p className="text-[11px] text-muted-foreground/70 mt-1">{formatDate(r.createdAt)}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </motion.div>
 
         <motion.div
           initial={{ y: 20, opacity: 0 }}

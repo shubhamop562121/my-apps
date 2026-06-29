@@ -4,12 +4,14 @@ import { motion } from "framer-motion";
 import { ArrowLeft, SlidersHorizontal } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { useCity } from "@/context/CityContext";
 
 const categoryOptions = ["Plumber", "Electrician", "Carpenter", "Mason", "Painter", "AC Repair", "Welder", "Labour", "CCTV", "RO Repair", "Cleaning"];
-const cityOptions = ["All Cities", "New Delhi", "Mumbai", "Bengaluru", "Hyderabad", "Pune", "Jaipur"];
 
 export default function FiltersPage() {
   const [, setLocation] = useLocation();
+  const { cities } = useCity();
+  const cityOptions = ["All Cities", ...cities.map((c) => c.name)];
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedCity, setSelectedCity] = useState("All Cities");
   const [experience, setExperience] = useState([0, 15]);

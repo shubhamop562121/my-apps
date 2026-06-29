@@ -4,6 +4,7 @@ import Layout from "@/components/Layout";
 import Badge from "@/components/Badge";
 import { Message } from "@/data/mockData";
 import { useCollection } from "@/hooks/useCollection";
+import { formatDate } from "@/lib/formatDate";
 
 export default function MessagesPage() {
   const { items: messages, loading, error, update, remove } = useCollection<Message>("messages");
@@ -72,7 +73,7 @@ export default function MessagesPage() {
                   </div>
                   <div className="flex flex-col items-end gap-1 flex-shrink-0">
                     <Badge label={m.status} variant={m.status === "open" ? "warning" : "success"} />
-                    <span className="text-[10px] text-muted-foreground">{m.createdAt}</span>
+                    <span className="text-[10px] text-muted-foreground">{formatDate(m.createdAt)}</span>
                   </div>
                 </div>
               </button>
@@ -87,7 +88,7 @@ export default function MessagesPage() {
                   <div>
                     <p className="font-semibold text-foreground">{selected.subject}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">From: {selected.name} · {selected.phone}</p>
-                    <p className="text-xs text-muted-foreground">{selected.createdAt}</p>
+                    <p className="text-xs text-muted-foreground">{formatDate(selected.createdAt)}</p>
                   </div>
                   <Badge label={selected.status} variant={selected.status === "open" ? "warning" : "success"} />
                 </div>

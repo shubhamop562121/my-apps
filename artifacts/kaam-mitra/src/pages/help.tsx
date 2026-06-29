@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ChevronDown, Phone, Mail } from "lucide-react";
+import { ArrowLeft, ChevronDown, Phone, Mail, Send, CheckCircle2, Loader2 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { sendSupportMessage } from "@/lib/support";
 
 const STORAGE_KEY = "km_contact_settings";
 
@@ -27,6 +29,43 @@ export default function HelpPage() {
   const [, setLocation] = useLocation();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const contact = getContactSettings();
+  const { user } = useAuth();
+
+  const [form, setForm] = useState({
+    name: "",
+    phone: user?.phoneNumber ?? "",
+    subject: "",
+    message: "",
+  });
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [formError, setFormError] = useState("");
+
+  const handleSend = async () => {
+    if (!form.subject.trim() || !form.message.trim()) {
+      setFormError("Please add a subject and a message.");
+      return;
+    }
+    setSending(true);
+    setFormError("");
+    try {
+      await sendSupportMessage({
+        name: form.name.trim() || user?.displayName || "KaamMitra User",
+        phone: form.phone.trim() || user?.phoneNumber || "",
+        subject: form.subject.trim(),
+        message: form.message.trim(),
+      });
+      setSent(true);
+      setForm({ name: "", phone: user?.phoneNumber ?? "", subject: "", message: "" });
+    } catch (err) {
+      console.error("sendSupportMessage failed:", err);
+      setFormError("Could not send your message. Please try again.");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const fieldCls = "w-full bg-white border border-border rounded-2xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition";
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -109,6 +148,69 @@ export default function HelpPage() {
               <p className="text-xs text-muted-foreground mt-0.5">{contact.supportEmail}</p>
             </div>
           </a>
+        </div>
+
+        <h3 className="text-sm font-bold text-foreground mb-3 mt-6 px-1">Send Us a Message</h3>
+        <div className="bg-white rounded-2xl border border-border p-5 shadow-sm flex flex-col gap-3">
+          {sent ? (
+            <div className="flex flex-col items-center text-center py-4">
+              <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mb-3">
+                <CheckCircle2 size={28} className="text-green-600" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">Message sent!</p>
+              <p className="text-xs text-muted-foreground mt-1">Our team will get back to you soon.</p>
+              <button
+                onClick={() => setSent(false)}
+                className="mt-4 text-xs font-semibold text-primary"
+                data-testid="btn-send-another"
+              >
+                Send another message
+              </button>
+            </div>
+          ) : (
+            <>
+              <input
+                className={fieldCls}
+                placeholder="Your name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                data-testid="input-message-name"
+              />
+              <input
+                className={fieldCls}
+                placeholder="Your phone number"
+                type="tel"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                data-testid="input-message-phone"
+              />
+              <input
+                className={fieldCls}
+                placeholder="Subject"
+                value={form.subject}
+                onChange={(e) => setForm({ ...form, subject: e.target.value })}
+                data-testid="input-message-subject"
+              />
+              <textarea
+                className={fieldCls}
+                placeholder="How can we help you?"
+                rows={4}
+                value={form.message}
+                onChange={(e) => setForm({ ...form, message: e.target.value })}
+                data-testid="input-message-body"
+              />
+              {formError && <p className="text-xs text-destructive">{formError}</p>}
+              <button
+                onClick={handleSend}
+                disabled={sending}
+                className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3.5 rounded-2xl font-semibold text-sm disabled:opacity-60"
+                data-testid="btn-send-message"
+              >
+                {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                {sending ? "Sending…" : "Send Message"}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

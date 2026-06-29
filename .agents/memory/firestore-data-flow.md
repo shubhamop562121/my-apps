@@ -100,5 +100,30 @@ admin key `km_admin_read_notifs`). **Why:** the old mock list reset every login 
 duplicate; deriving + stable ids + persisted read-set means login never repeats or resets
 already-seen items, and handled items (status changes / moderation) drop off automatically.
 
+**Date fields are dual-shaped — never render or sort them raw.** Seed docs store dates as ISO
+strings; docs written by either app via `addDoc`/`add` use `serverTimestamp()` → a Firestore
+Timestamp object `{seconds,nanoseconds}`. So any `createdAt`/`bookedAt`/`time` can be EITHER
+form at runtime. Rendering a Timestamp directly in JSX throws "Objects are not valid as a React
+child"; calling string methods on it (e.g. `.localeCompare`) throws "is not a function". **Rule:**
+render dates through a `formatDate(unknown)` helper (both apps have one in `lib/formatDate.ts`)
+and sort by a normalized numeric ms key (see admin `useAdminNotifications.ts` `normTime`), never
+by the raw field. This bit twice: admin Reviews/Messages rendered raw `createdAt`, and admin
+notifications sorted with `.localeCompare` — both only crashed once the app started writing real
+Timestamps.
+
+**Advertisements have 4 positions — render every one or admin edits silently vanish.** The admin
+Advertisements page offers positions `Home Top`, `Home Bottom`, `Category Page`, `Worker Detail`.
+The app must surface each: shared `components/AdBanner.tsx` (wraps `useAdvertisements(position)`,
+shows first active ad) is mounted in `home.tsx` (Home Top + Home Bottom), `category.tsx` (Category
+Page), and `worker.tsx` (Worker Detail). `useAdvertisements` filters status active + date window +
+position client-side (no composite index). **Lesson:** when an admin field is an enum of slots,
+audit that the app renders ALL slot values, not just the obvious ones.
+
+**Client write validation.** App `addReview` (hooks/useReviews.ts) and `sendSupportMessage`
+(lib/support.ts) clamp/validate before `addDoc`: rating 1–5 integer, trimmed + length-capped
+text, required fields throw. App writes reviews `status:"pending"` and messages `status:"open"`;
+admin enums must match (`approved|pending|removed`, `open|resolved`). Until Firestore rules are
+deployed these are the only guard against spam/malformed docs.
+
 **Open risk:** Security rules in `firestore.rules` are written but only take effect once the
 user deploys them in their Firebase project; until then the DB is still open/permissive.

@@ -4,6 +4,7 @@ import Layout from "@/components/Layout";
 import Badge from "@/components/Badge";
 import { Review } from "@/data/mockData";
 import { useCollection } from "@/hooks/useCollection";
+import { formatDate } from "@/lib/formatDate";
 
 const Stars = ({ n }: { n: number }) => (
   <span className="text-amber-400 text-sm">{"★".repeat(n)}{"☆".repeat(5 - n)}</span>
@@ -56,7 +57,7 @@ export default function ReviewsPage() {
                     <span className="text-muted-foreground text-xs">→</span>
                     <p className="text-sm text-primary font-medium">{r.workerName}</p>
                     <Stars n={r.rating} />
-                    <span className="text-xs text-muted-foreground">{r.createdAt}</span>
+                    <span className="text-xs text-muted-foreground">{formatDate(r.createdAt)}</span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">{r.comment}</p>
                 </div>

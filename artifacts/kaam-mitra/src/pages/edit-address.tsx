@@ -2,23 +2,20 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowLeft, MapPin, Check } from "lucide-react";
-
-const cities = [
-  "New Delhi", "Mumbai", "Bangalore", "Hyderabad", "Chennai",
-  "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Lucknow",
-  "Surat", "Chandigarh", "Indore", "Nagpur", "Bhopal",
-];
+import { useCity } from "@/context/CityContext";
 
 export default function EditAddressPage() {
   const [, setLocation] = useLocation();
+  const { cities, selectedCity: globalCity, setSelectedCity: setGlobalCity } = useCity();
   const [houseNo, setHouseNo] = useState("42B");
   const [street, setStreet] = useState("Rajpur Road");
   const [landmark, setLandmark] = useState("Near Metro Station");
   const [pincode, setPincode] = useState("110001");
-  const [selectedCity, setSelectedCity] = useState("New Delhi");
+  const [selectedCity, setSelectedCity] = useState(globalCity);
   const [saved, setSaved] = useState(false);
 
   const handleSave = () => {
+    setGlobalCity(selectedCity);
     setSaved(true);
     setTimeout(() => window.history.back(), 900);
   };
@@ -96,15 +93,15 @@ export default function EditAddressPage() {
             <div className="flex flex-wrap gap-2">
               {cities.map((city) => (
                 <button
-                  key={city}
-                  onClick={() => setSelectedCity(city)}
+                  key={city.id}
+                  onClick={() => setSelectedCity(city.name)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors ${
-                    selectedCity === city
+                    selectedCity === city.name
                       ? "bg-primary text-primary-foreground border-primary"
                       : "bg-white text-foreground border-border hover:border-primary/40"
                   }`}
                 >
-                  {city}
+                  {city.name}
                 </button>
               ))}
             </div>

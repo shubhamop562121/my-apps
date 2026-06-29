@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Search, SlidersHorizontal, Users, Loader2 } from "lucide-react";
 import WorkerCard from "@/components/WorkerCard";
 import EmptyState from "@/components/EmptyState";
+import AdBanner from "@/components/AdBanner";
 import { useSaved } from "@/context/SavedContext";
 import { useWorkers } from "@/hooks/useWorkers";
 import { useCategories } from "@/hooks/useCategories";
@@ -65,6 +66,8 @@ export default function CategoryPage() {
           </button>
         </div>
       </div>
+
+      <AdBanner position="Category Page" />
 
       <div className="px-5 pt-5">
         {loading ? (

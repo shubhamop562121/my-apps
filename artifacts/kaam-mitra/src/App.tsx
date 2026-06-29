@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import MobileFrame from "@/components/MobileFrame";
 import { SavedProvider } from "@/context/SavedContext";
 import { AppointmentsProvider } from "@/context/AppointmentsContext";
+import { CityProvider } from "@/context/CityContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { auth } from "@/lib/firebase";
 import SplashPage from "@/pages/splash";
@@ -113,13 +114,15 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
-          <AppointmentsProvider>
-            <SavedProvider>
-              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-                <Router />
-              </WouterRouter>
-            </SavedProvider>
-          </AppointmentsProvider>
+          <CityProvider>
+            <AppointmentsProvider>
+              <SavedProvider>
+                <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                  <Router />
+                </WouterRouter>
+              </SavedProvider>
+            </AppointmentsProvider>
+          </CityProvider>
         </AuthProvider>
         <Toaster />
       </TooltipProvider>
