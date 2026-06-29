@@ -91,5 +91,14 @@ SVG (keyed by slug) when `icon` is empty. **Why:** previously the SVG won over t
 slugs matching a built-in (plumber/electrician/…), so admin icon edits silently did nothing in
 the app. So: to let admins fully control icons, emoji must take priority over the SVG.
 
+**Notifications = derived, never stored.** Both apps build notifications by DERIVING them from
+real Firestore state with stable, content-based ids — they do NOT write a `notifications`
+collection. App: derives from the signed-in user's `appointments` (id = `apt-<id>-<status>`).
+Admin: derives from actionable state — Pending appointments, `pending` reviews, `open` messages
+(id tied to source doc). Read state lives in localStorage (app key is per-uid `km_read_notifs_<uid>`,
+admin key `km_admin_read_notifs`). **Why:** the old mock list reset every login and could
+duplicate; deriving + stable ids + persisted read-set means login never repeats or resets
+already-seen items, and handled items (status changes / moderation) drop off automatically.
+
 **Open risk:** Security rules in `firestore.rules` are written but only take effect once the
 user deploys them in their Firebase project; until then the DB is still open/permissive.

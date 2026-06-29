@@ -7,12 +7,14 @@ import CategoryIcon from "@/components/CategoryIcon";
 import { useSaved } from "@/context/SavedContext";
 import { useWorkers } from "@/hooks/useWorkers";
 import { useCategories } from "@/hooks/useCategories";
+import { useNotifications } from "@/hooks/useNotifications";
 
 export default function HomePage() {
   const [, setLocation] = useLocation();
   const { savedIds, toggleSave } = useSaved();
   const { workers, loading } = useWorkers();
   const { categories } = useCategories();
+  const { unreadCount } = useNotifications();
 
   const popularWorkers = workers.slice(0, 5);
   const recentWorkers = workers.slice(5, 9);
@@ -31,7 +33,11 @@ export default function HomePage() {
             data-testid="btn-notifications"
           >
             <Bell size={18} className="text-white" />
-            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-400 rounded-full border border-primary" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-red-500 rounded-full border border-primary flex items-center justify-center text-[9px] font-bold text-white leading-none">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
           </button>
         </div>
         <div>
