@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { useAdvertisements } from "@/hooks/useAdvertisements";
 
 /**
  * Renders the first live advertisement for a given position. Returns nothing
- * when there are no active ads for that slot. Used across Home, Category, and
- * Worker Detail pages so admin-managed ads surface in the user app.
+ * when there are no active ads for that slot, or when the ad image fails to
+ * load (e.g. admin pasted a page URL instead of a direct image link). Used
+ * across Home, Category, and Worker Detail pages so admin-managed ads surface
+ * in the user app.
  */
 export default function AdBanner({
   position,
@@ -13,8 +16,11 @@ export default function AdBanner({
   className?: string;
 }) {
   const { ads } = useAdvertisements(position);
+  const [broken, setBroken] = useState(false);
+
   if (ads.length === 0) return null;
   const ad = ads[0];
+  if (broken) return null;
 
   const image = (
     <img
@@ -22,6 +28,7 @@ export default function AdBanner({
       alt={ad.title}
       className="w-full h-auto rounded-2xl object-cover"
       loading="lazy"
+      onError={() => setBroken(true)}
     />
   );
 

@@ -10,12 +10,13 @@ export default function AdsPage() {
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState<Ad | null>(null);
+  const [previewError, setPreviewError] = useState(false);
   const [form, setForm] = useState({ title:"",imageUrl:"",linkUrl:"",position:"Home Top",status:"active" as "active"|"inactive",startDate:"",endDate:"" });
 
   const inputCls = "w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30";
 
-  const openAdd = () => { setEditing(null); setForm({ title:"",imageUrl:"",linkUrl:"",position:"Home Top",status:"active",startDate:"",endDate:"" }); setShowModal(true); };
-  const openEdit = (a: Ad) => { setEditing(a); setForm({ title:a.title,imageUrl:a.imageUrl,linkUrl:a.linkUrl,position:a.position,status:a.status,startDate:a.startDate,endDate:a.endDate }); setShowModal(true); };
+  const openAdd = () => { setEditing(null); setPreviewError(false); setForm({ title:"",imageUrl:"",linkUrl:"",position:"Home Top",status:"active",startDate:"",endDate:"" }); setShowModal(true); };
+  const openEdit = (a: Ad) => { setEditing(a); setPreviewError(false); setForm({ title:a.title,imageUrl:a.imageUrl,linkUrl:a.linkUrl,position:a.position,status:a.status,startDate:a.startDate,endDate:a.endDate }); setShowModal(true); };
   const handleDelete = async (id: string) => {
     if (!confirm("Delete ad?")) return;
     try { await remove(id); } catch (err) { alert(`Failed to delete ad: ${(err as Error).message}`); }
@@ -88,7 +89,26 @@ export default function AdsPage() {
             </div>
             <div className="p-6 flex flex-col gap-4">
               <div><label className="text-xs font-semibold mb-1 block">Title</label><input className={inputCls} value={form.title} onChange={(e) => setForm({...form,title:e.target.value})} placeholder="Ad title" /></div>
-              <div><label className="text-xs font-semibold mb-1 block">Image URL</label><input className={inputCls} value={form.imageUrl} onChange={(e) => setForm({...form,imageUrl:e.target.value})} placeholder="https://..." /></div>
+              <div>
+                <label className="text-xs font-semibold mb-1 block">Image URL</label>
+                <input className={inputCls} value={form.imageUrl} onChange={(e) => { setForm({...form,imageUrl:e.target.value}); setPreviewError(false); }} placeholder="https://...image.jpg" />
+                <p className="text-[11px] text-muted-foreground mt-1">Paste a <span className="font-semibold">direct image link</span> (ends in .jpg/.png). A page link (e.g. unsplash.com/photos/…) won't work — open the image, right-click → "Copy image address".</p>
+                {form.imageUrl.trim() !== "" && (
+                  <div className="mt-2 rounded-xl border border-border overflow-hidden bg-background">
+                    {previewError ? (
+                      <div className="px-3 py-4 text-center text-[11px] text-red-500">This URL did not load as an image. Use a direct image link.</div>
+                    ) : (
+                      <img
+                        src={form.imageUrl}
+                        alt="Ad preview"
+                        className="w-full h-28 object-cover"
+                        onError={() => setPreviewError(true)}
+                        onLoad={() => setPreviewError(false)}
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
               <div><label className="text-xs font-semibold mb-1 block">Link URL</label><input className={inputCls} value={form.linkUrl} onChange={(e) => setForm({...form,linkUrl:e.target.value})} placeholder="https://..." /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className="text-xs font-semibold mb-1 block">Position</label><select className={inputCls} value={form.position} onChange={(e) => setForm({...form,position:e.target.value})}>{["Home Top","Home Bottom","Category Page","Worker Detail"].map((p) => <option key={p}>{p}</option>)}</select></div>
