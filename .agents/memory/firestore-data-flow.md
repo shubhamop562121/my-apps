@@ -127,3 +127,20 @@ deployed these are the only guard against spam/malformed docs.
 
 **Open risk:** Security rules in `firestore.rules` are written but only take effect once the
 user deploys them in their Firebase project; until then the DB is still open/permissive.
+
+## Admin worker assignment (Appointments page)
+
+The admin assigns a worker to an Approved appointment via a **searchable worker
+picker** (not a plain dropdown): filters active workers by name/category/city and
+shows each worker's location (city), category, experience, rating, verified badge.
+Results are sorted nearby-first by checking if the worker's `city` appears in the
+appointment `address` string, then by rating.
+
+**Gotcha:** the picker's `assignWorker` selection is component-level state shared
+across appointments — it MUST be reset when the selected appointment changes
+(effect on `selectedId`), otherwise a leftover pick can be assigned to the wrong
+appointment. Same applies to reject-note state.
+
+Assignment writes `assignedWorkerName` + `assignedWorkerId` via `updateAppointment`;
+the details panel re-derives the assigned worker's city/phone by looking up
+`assignedWorkerId` in the live workers list (not stored on the appointment).
