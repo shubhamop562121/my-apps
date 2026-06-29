@@ -3,6 +3,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
@@ -14,6 +15,7 @@ type AuthContextType = {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -24,12 +26,25 @@ const AuthContext = createContext<AuthContextType | null>(null);
  * Firebase console / locked by security rules, so it is the single source of
  * truth for who may access the admin panel.
  */
-async function isAuthorizedAdmin(email: string): Promise<boolean> {
+async function isAuthorizedAdmin(email: string, attempts = 3): Promise<boolean> {
   const key = email.trim().toLowerCase();
   console.log("[AdminAuth] checking admin allowlist for:", key);
-  const snap = await getDoc(doc(db, "admins", key));
-  console.log("[AdminAuth] admin allowlist match:", snap.exists());
-  return snap.exists();
+  let lastErr: unknown;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const snap = await getDoc(doc(db, "admins", key));
+      console.log("[AdminAuth] admin allowlist match:", snap.exists());
+      return snap.exists();
+    } catch (err) {
+      // A thrown error means a transient read failure (network/rules), NOT a
+      // definitive "not an admin". Retry a few times before giving up so a blip
+      // doesn't force a valid admin to sign in again.
+      lastErr = err;
+      console.warn(`[AdminAuth] allowlist read failed (attempt ${i + 1}/${attempts})`, err);
+      await new Promise((r) => setTimeout(r, 400 * (i + 1)));
+    }
+  }
+  throw lastErr;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -59,9 +74,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setAdmin(null);
         }
       } catch (err) {
-        console.error("[AdminAuth] admin verification failed:", err);
-        await signOut(auth);
-        setAdmin(null);
+        // Transient verification failure (e.g. offline). Do NOT sign out — that
+        // would force a valid admin to log in again after a network blip, which
+        // defeats "stay signed in on this device". Keep the Firebase session and
+        // any existing admin state; access is re-verified on the next auth event.
+        console.error("[AdminAuth] admin verification failed (keeping session):", err);
+        setAdmin((prev) => prev);
       } finally {
         setLoading(false);
       }
@@ -88,8 +106,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAdmin(null);
   };
 
+  /**
+   * Sends a Firebase password-reset email. The link in that email is the only
+   * place a new password can be set — this keeps resets secure (an attacker who
+   * doesn't control the inbox can't change the password).
+   */
+  const resetPassword = async (email: string): Promise<void> => {
+    const target = email.trim();
+    console.log("[AdminAuth] password reset requested for:", target);
+    await sendPasswordResetEmail(auth, target);
+    console.log("[AdminAuth] password reset email sent");
+  };
+
   return (
-    <AuthContext.Provider value={{ admin, loading, login, logout }}>
+    <AuthContext.Provider value={{ admin, loading, login, logout, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );
